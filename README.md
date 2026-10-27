@@ -1,3 +1,5 @@
+# Team: SE-2534
+# Members: Ailbekov Maksat, Nurlybek Anuar
 # SDP_Final
 
 TVA mission simulator with Loki variants. Java final project for SDP.
