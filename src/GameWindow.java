@@ -25,9 +25,11 @@ public class GameWindow {
     private MissionLocation selectedLocation = MissionLocation.NEW_YORK;
     private Mission preparedMission;
     private final LokiCreator[] creators = {new LokiCreator.OrdinaryCreator(),
-            new LokiCreator.ClassicCreator(), new LokiCreator.AlligatorCreator()};
+            new LokiCreator.ClassicCreator(), new LokiCreator.AlligatorCreator(),
+            new LokiCreator.SylvieCreator()};
     private LokiCreator selectedCreator = creators[0];
     private final JCheckBox amplifier = new JCheckBox("Усилитель магии: +15 к магии");
+    private final JCheckBox amulet = new JCheckBox("Амулет переговоров: +15 к переговорам");
     private final JCheckBox shield = new JCheckBox("Временной щит: штраф за неудачу +10 вместо +15");
     private final JTextArea heroPreview = text("");
     private final JLabel sceneTitle = label("", 25, GOLD);
@@ -182,7 +184,7 @@ public class GameWindow {
         JPanel panel = vertical();
         panel.add(label("Выберите вариант Локи", 26, GOLD));
         panel.add(Box.createVerticalStrut(20));
-        JPanel cards = new JPanel(new GridLayout(1, 3, 16, 0));
+        JPanel cards = new JPanel(new GridLayout(1, 4, 16, 0));
         cards.setOpaque(false);
         ButtonGroup variants = new ButtonGroup();
         for (LokiCreator creator : creators) {
@@ -198,12 +200,14 @@ public class GameWindow {
             card.add(text(stats(creator.createVariant())));
             cards.add(card);
         }
-        cards.setMaximumSize(new Dimension(Integer.MAX_VALUE, 190));
+        cards.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
         panel.add(cards);
         panel.add(Box.createVerticalStrut(20));
         panel.add(amplifier);
+        panel.add(amulet);
         panel.add(shield);
         amplifier.addActionListener(event -> updateHeroPreview());
+        amulet.addActionListener(event -> updateHeroPreview());
         shield.addActionListener(event -> updateHeroPreview());
         panel.add(Box.createVerticalStrut(24));
         panel.add(label("Итоговая подготовка", 20, GOLD));
@@ -217,6 +221,7 @@ public class GameWindow {
     private LokiVariant createEquippedHero() {
         LokiVariant hero = selectedCreator.createVariant();
         if (amplifier.isSelected()) { hero = new MagicAmplifier(hero); }
+        if (amulet.isSelected()) { hero = new DiplomacyAmulet(hero); }
         if (shield.isSelected()) { hero = new TimeShield(hero); }
         return hero;
     }

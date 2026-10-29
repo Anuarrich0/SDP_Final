@@ -10,6 +10,7 @@ public class GameChecks {
         }
         checkCreation();
         checkEquipmentAndStrategies();
+        checkSylvieAndAmulet();
         SwingUtilities.invokeAndWait(GameChecks::checkObservers);
         checkCampaign();
         checkFailureAndRetry();
@@ -71,6 +72,25 @@ public class GameChecks {
         assert !new CombatStrategy().execute(equipped, last, Difficulty.STANDARD).success();
         assert new CombatStrategy().execute(new LokiCreator.AlligatorCreator().createVariant(),
                 last, Difficulty.STANDARD).success();
+    }
+
+    private static void checkSylvieAndAmulet() {
+        LokiVariant sylvie = new LokiCreator.SylvieCreator().createVariant();
+        assert sylvie.getName().equals("Сильви");
+        assert sylvie.getMagicPower() == 65 && sylvie.getCombatPower() == 45 && sylvie.getDiplomacy() == 55;
+        assert sylvie != new LokiCreator.SylvieCreator().createVariant();
+        LokiVariant amulet = new DiplomacyAmulet(sylvie);
+        assert amulet.getDiplomacy() == 70;
+        assert amulet.getMagicPower() == 65 && amulet.getCombatPower() == 45;
+        assert amulet.getFailurePenalty() == 15;
+        LokiVariant full = new TimeShield(new MagicAmplifier(new DiplomacyAmulet(sylvie)));
+        assert full.getDiplomacy() == 70 && full.getMagicPower() == 80 && full.getCombatPower() == 45;
+        assert full.getFailurePenalty() == 10;
+        assert full.getDescription().contains("амулет переговоров");
+        Scene plain = MissionLocation.NEW_YORK.getScenes().get(0);
+        assert plain.diplomacyModifier() == 0;
+        assert !new NegotiateStrategy().execute(sylvie, plain, Difficulty.STANDARD).success();
+        assert new NegotiateStrategy().execute(amulet, plain, Difficulty.STANDARD).success();
     }
 
     private static void checkObservers() {

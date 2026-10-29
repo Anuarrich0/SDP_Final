@@ -16,6 +16,8 @@ java -cp out Main
 ## Gameplay
 
 Choose a mission and difficulty, select Loki and equipment, then choose one action per scene.
+Four variants are available: Ordinary, Classic, Alligator and Sylvie (magic 65 / combat 45 / diplomacy 55).
+Equipment includes the magic amplifier, the diplomacy amulet (+15 to diplomacy) and the time shield.
 After confirming an action, use Next to continue. Finish three scenes with instability at 20 or below.
 Reaching 100 ends the attempt immediately. Successful missions unlock Asgard, then the Void.
 
@@ -28,8 +30,8 @@ Progress and the archive last until the application closes.
 | Pattern | Classes | Use |
 | --- | --- | --- |
 | Builder | `Mission.Builder` | Assemble and validate mission settings |
-| Factory Method | `LokiCreator` and its three creators | Create different Loki variants through an overridden method |
-| Decorator | `EquipmentDecorator`, `MagicAmplifier`, `TimeShield` | Add magic power and reduce failure penalties |
+| Factory Method | `LokiCreator` and its four creators | Create different Loki variants through an overridden method |
+| Decorator | `EquipmentDecorator`, `MagicAmplifier`, `DiplomacyAmulet`, `TimeShield` | Add magic power, diplomacy and reduce failure penalties |
 | Strategy | `ActionStrategy`, `NegotiateStrategy`, `IllusionStrategy`, `CombatStrategy` | Resolve actions using different hero stats |
 | Facade | `MissionControlFacade` | Start missions, resolve turns, unlock locations and store results |
 | Observer | `Timeline`, `TimelineListener`, `TimelineMonitor`, `EventLog` | Update the Swing monitor and event log when instability changes |
@@ -49,6 +51,9 @@ java -ea -Djava.awt.headless=true -cp out GameChecks
 
 The checks cover all six patterns, campaign progression, failed attempts, retry, shield penalties,
 observer subscription/removal, limits 0-100, duplicate actions and immutable archived results.
+They also verify the Sylvie creator, the diplomacy amulet (55 -> 70, other stats unchanged),
+its combination with the amplifier and shield, and that Sylvie passes the Standard diplomacy
+threshold in a scene without a modifier.
 
 For a successful first mission: Standard difficulty, Classic Loki, Magic amplifier,
 then Illusion / Illusion / Negotiate. Instability: 70 -> 45 -> 20 -> 0.

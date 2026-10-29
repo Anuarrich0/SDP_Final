@@ -19,6 +19,11 @@ public abstract class LokiCreator {
         public String toString() { return "Локи-аллигатор"; }
     }
 
+    public static class SylvieCreator extends LokiCreator {
+        protected LokiVariant createLoki() { return new Sylvie(); }
+        public String toString() { return "Сильви"; }
+    }
+
     private static class OrdinaryLoki extends Loki {
         OrdinaryLoki() { super("Обычный Локи", 45, 50, 65); }
     }
@@ -29,5 +34,9 @@ public abstract class LokiCreator {
 
     private static class AlligatorLoki extends Loki {
         AlligatorLoki() { super("Локи-аллигатор", 20, 80, 10); }
+    }
+
+    private static class Sylvie extends Loki {
+        Sylvie() { super("Сильви", 65, 45, 55); }
     }
 }
