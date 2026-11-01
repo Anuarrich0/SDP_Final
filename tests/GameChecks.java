@@ -2,6 +2,10 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
 
 public class GameChecks {
     public static void main(String[] args) throws Exception {
@@ -12,11 +16,31 @@ public class GameChecks {
         checkEquipmentAndStrategies();
         checkSylvieAndAmulet();
         SwingUtilities.invokeAndWait(GameChecks::checkObservers);
+        SwingUtilities.invokeAndWait(GameChecks::checkArtwork);
         checkCampaign();
         checkFailureAndRetry();
         checkBounds();
+        checkPersistence();
         System.out.println("PASS: Builder, Factory Method, Decorator, Strategy, Observer, Facade");
         System.out.println("PASS: campaign, failed mission, retry, collapse, guards, immutable results");
+    }
+
+    private static void checkArtwork() {
+        for (String name : new String[]{"new_york", "asgard", "void", "alligator", "sylvie", "variants-sheet"}) {
+            java.awt.image.BufferedImage image = TvaTheme.image(name);
+            assert image.getWidth() >= 200 && image.getHeight() >= 200 : name;
+        }
+        for (String name : new String[]{"loki", "classic", "alligator", "sylvie", "new_york"}) {
+            TvaTheme.ArtPanel panel = new TvaTheme.ArtPanel(name, 160, true);
+            panel.setSize(280, 160);
+            java.awt.image.BufferedImage rendered = new java.awt.image.BufferedImage(280, 160,
+                    java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            java.awt.Graphics2D graphics = rendered.createGraphics();
+            panel.paint(graphics);
+            graphics.dispose();
+            assert (rendered.getRGB(140, 80) >>> 24) == 255 : name;
+        }
+        System.out.println("PASS: bundled artwork loads and paints at card size");
     }
 
     private static Mission mission(MissionLocation location) {
@@ -206,6 +230,75 @@ public class GameChecks {
         assert facade.getResult().success();
         List<TurnResult> turns = facade.getResult().turns();
         assert turns.get(2).before() == 10 && turns.get(2).after() == 0;
+    }
+
+    private static void checkPersistence() throws IOException {
+        Path directory = Files.createTempDirectory(Path.of("out"), "campaign-check-");
+        Path file = directory.resolve("campaign.xml");
+        CampaignStore store = new CampaignStore(file);
+        try {
+            assert store.load().isEmpty();
+            MissionControlFacade game = new MissionControlFacade();
+            Mission named = new Mission.Builder().location(MissionLocation.NEW_YORK)
+                    .title("Локи & Сильви: <разлом> \"2012\"").build();
+            game.startMission(named, new MagicAmplifier(new DiplomacyAmulet(new LokiCreator.SylvieCreator().createVariant())));
+            play(game, new ActionStrategy[]{new IllusionStrategy(), new IllusionStrategy(), new NegotiateStrategy()},
+                    new int[]{45, 20, 0});
+            store.save(game.getArchive());
+            MissionControlFacade restored = new MissionControlFacade(store.load());
+            assert !restored.isActive() && restored.isUnlocked(MissionLocation.ASGARD);
+            assert !restored.isUnlocked(MissionLocation.VOID);
+            assert restored.getArchive().get(0).mission().getTitle().equals(named.getTitle());
+            assert restored.getArchive().get(0).describe().equals(game.getResult().describe());
+            restored.startMission(mission(MissionLocation.ASGARD), classic());
+            restored.abortMission();
+            store.save(restored.getArchive());
+            assert store.load().size() == 1 : "Aborted missions must not enter the save";
+            Mission hard = new Mission.Builder().location(MissionLocation.NEW_YORK).difficulty(Difficulty.HARD).build();
+            restored.startMission(hard, new LokiCreator.ClassicCreator().createVariant());
+            play(restored, new ActionStrategy[]{new CombatStrategy(), new CombatStrategy()}, new int[]{95, 100});
+            store.save(restored.getArchive());
+            assert store.load().size() == 2 && store.load().get(1).turns().size() == 2;
+            assert !store.load().get(1).success();
+            LokiVariant ordinary = new MagicAmplifier(new LokiCreator.OrdinaryCreator().createVariant());
+            restored.startMission(mission(MissionLocation.ASGARD), ordinary);
+            play(restored, new ActionStrategy[]{new NegotiateStrategy(), new IllusionStrategy(), new CombatStrategy()},
+                    new int[]{45, 20, 0});
+            restored.startMission(mission(MissionLocation.VOID), ordinary);
+            play(restored, new ActionStrategy[]{new CombatStrategy(), new IllusionStrategy(), new NegotiateStrategy()},
+                    new int[]{45, 20, 0});
+            store.save(restored.getArchive());
+            MissionControlFacade completed = new MissionControlFacade(store.load());
+            assert completed.getArchive().size() == 4 && completed.isUnlocked(MissionLocation.VOID);
+            for (int i = 0; i < 4; i++) {
+                assert completed.getArchive().get(i).describe().equals(restored.getArchive().get(i).describe());
+            }
+
+            Properties corrupt = new Properties();
+            try (var input = Files.newInputStream(file)) { corrupt.loadFromXML(input); }
+            corrupt.setProperty("0.turn.0.after", "101");
+            try (var output = Files.newOutputStream(file)) { corrupt.storeToXML(output, "Invalid test save"); }
+            byte[] original = Files.readAllBytes(file);
+            try { store.load(); throw new AssertionError("Corrupt save was accepted"); }
+            catch (IOException expected) { assert expected.getMessage().contains("данные кампании"); }
+            assert java.util.Arrays.equals(original, Files.readAllBytes(file));
+
+            Files.writeString(file, "broken xml");
+            try { store.load(); throw new AssertionError("Malformed XML was accepted"); }
+            catch (IOException expected) { assert Files.readString(file).equals("broken xml"); }
+            store.save(List.of());
+            assert store.load().isEmpty();
+            byte[] emptySave = Files.readAllBytes(file);
+            try {
+                new CampaignStore(file.resolve("blocked.xml")).save(List.of());
+                throw new AssertionError("Write into a file as directory was accepted");
+            } catch (IOException expected) { assert java.util.Arrays.equals(emptySave, Files.readAllBytes(file)); }
+            try (var files = Files.list(directory)) { assert files.count() == 1 : "Temporary save leaked"; }
+            System.out.println("PASS: campaign save/reload, unlocks, UTF-8, collapse, abort and corrupt saves");
+        } finally {
+            Files.deleteIfExists(file);
+            Files.deleteIfExists(directory);
+        }
     }
 
     private static void fails(Class<? extends RuntimeException> type, Runnable action) {

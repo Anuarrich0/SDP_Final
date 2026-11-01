@@ -15,6 +15,17 @@ public class MissionControlFacade {
     private boolean awaitingNext;
     private MissionResult result;
 
+    public MissionControlFacade() { this(List.of()); }
+
+    public MissionControlFacade(List<MissionResult> savedArchive) {
+        for (MissionResult saved : savedArchive) {
+            if (!unlocked.contains(saved.mission().getLocation())) {
+                throw new IllegalArgumentException("В архиве нарушен порядок открытия локаций.");
+            }
+            archiveResult(saved);
+        }
+    }
+
     public void startMission(Mission mission, LokiVariant hero) {
         Objects.requireNonNull(mission);
         Objects.requireNonNull(hero);
@@ -54,11 +65,7 @@ public class MissionControlFacade {
         if (timeline.getInstability() == 100 || sceneIndex == mission.getScenes().size() - 1) {
             result = new MissionResult(mission, hero.getDescription(), turns,
                     log.getEntries(), timeline.getInstability());
-            archive.add(result);
-            if (result.success()) {
-                int next = mission.getLocation().ordinal() + 1;
-                if (next < MissionLocation.values().length) { unlocked.add(MissionLocation.values()[next]); }
-            }
+            archiveResult(result);
             timeline.clearListeners();
         }
         return turn;
@@ -104,4 +111,12 @@ public class MissionControlFacade {
     }
 
     public List<MissionResult> getArchive() { return List.copyOf(archive); }
+
+    private void archiveResult(MissionResult completed) {
+        archive.add(completed);
+        if (completed.success()) {
+            int next = completed.mission().getLocation().ordinal() + 1;
+            if (next < MissionLocation.values().length) { unlocked.add(MissionLocation.values()[next]); }
+        }
+    }
 }

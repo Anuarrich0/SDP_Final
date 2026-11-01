@@ -1,0 +1,41 @@
+{
+  "tool": "built-in image_gen",
+  "images": [
+    {
+      "id": "loki",
+      "prompt": "Use case: illustration-story. Asset for a Java Swing student game about Marvel Loki and TVA. Beautiful hand-painted 2D concept illustration with fine graphic-novel linework, richly detailed but clean shapes, dark forest green and muted antique gold palette, warm amber highlights, cinematic gentle light. Fictional comic character design, no actor likeness, no photography, no words, no lettering, no logos, no watermark, no UI, no borders. Portrait format 2:3. Waist-up ordinary Loki: adult male with swept-back black hair, clever smile, elegant dark green Asgardian tunic with gold trim, slender curved gold horns. Alone, centered, hands visible, emerald magical light in one hand, dark green atmospheric background. Face and horns entirely inside image, small headroom.",
+      "generated": false
+    },
+    {
+      "id": "classic",
+      "prompt": "Use case: illustration-story. Asset for a Java Swing student game about Marvel Loki and TVA. Beautiful hand-painted 2D concept illustration with fine graphic-novel linework, richly detailed but clean shapes, dark forest green and muted antique gold palette, warm amber highlights, cinematic gentle light. Fictional comic character design, no actor likeness, no photography, no words, no lettering, no logos, no watermark, no UI, no borders. Portrait format 2:3. Waist-up Classic Loki: elderly sorcerer with silver hair, kind weathered face, green tunic, yellow-gold shoulder cape, tall narrow golden horned headpiece. Alone, centered, magical green illusion threads between hands; dark green atmospheric background. Face and horns entirely inside image.",
+      "generated": false
+    },
+    {
+      "id": "alligator",
+      "prompt": "Use case: illustration-story. Asset for a Java Swing student game about Marvel Loki and TVA. Beautiful hand-painted 2D concept illustration with fine graphic-novel linework, richly detailed but clean shapes, dark forest green and muted antique gold palette, warm amber highlights, cinematic gentle light. Fictional comic character design, no actor likeness, no photography, no words, no lettering, no logos, no watermark, no UI, no borders. Portrait format 2:3. Single small green alligator Loki wearing tiny golden horns, alligator recognizable and expressive, sitting on ancient dark stone slab, full creature visible from snout to tail with subtle green magical motes, dark green atmospheric background; humorous but dignified. NO humanoid body.",
+      "generated": true
+    },
+    {
+      "id": "sylvie",
+      "prompt": "Use case: illustration-story. Asset for a Java Swing student game about Marvel Loki and TVA. Beautiful hand-painted 2D concept illustration with fine graphic-novel linework, richly detailed but clean shapes, dark forest green and muted antique gold palette, warm amber highlights, cinematic gentle light. Fictional comic character design, no actor likeness, no photography, no words, no lettering, no logos, no watermark, no UI, no borders. Portrait format 2:3. Waist-up Sylvie: confident adult woman with shoulder-length wavy blonde hair, asymmetrical broken golden horn headband, dark green and black leather Asgardian armor with gold accents, emerald magic in hand. Alone centered dark green atmospheric background. Distinct female character, no actor likeness.",
+      "generated": true
+    },
+    {
+      "id": "new_york",
+      "prompt": "Use case: illustration-story. Asset for a Java Swing student game about Marvel Loki and TVA. Beautiful hand-painted 2D concept illustration with fine graphic-novel linework, richly detailed but clean shapes, dark forest green and muted antique gold palette, warm amber highlights, cinematic gentle light. Fictional comic character design, no actor likeness, no photography, no words, no lettering, no logos, no watermark, no UI, no borders. Wide landscape format 16:9. New York 2012 city street in a Marvel-inspired setting, elegant skyscrapers including distinctive modern tower, amber rectangular TVA time portal on right sidewalk with green and gold unstable timeline filaments in air, late afternoon smoky golden light. No characters in foreground. Detailed 2D painted game location background. Keep center visually calm for a scene overlay.",
+      "generated": true
+    },
+    {
+      "id": "asgard",
+      "prompt": "Use case: illustration-story. Asset for a Java Swing student game about Marvel Loki and TVA. Beautiful hand-painted 2D concept illustration with fine graphic-novel linework, richly detailed but clean shapes, dark forest green and muted antique gold palette, warm amber highlights, cinematic gentle light. Fictional comic character design, no actor likeness, no photography, no words, no lettering, no logos, no watermark, no UI, no borders. Wide landscape format 16:9. Asgard fantasy realm: towering gilded palace, long stone bridge crossing misty valley, shimmering green runic gate and orange rectangular time portal near bridge, golden sunset, emerald shadows. No characters in foreground. Detailed 2D painted game location background.",
+      "generated": true
+    },
+    {
+      "id": "void",
+      "prompt": "Use case: illustration-story. Asset for a Java Swing student game about Marvel Loki and TVA. Beautiful hand-painted 2D concept illustration with fine graphic-novel linework, richly detailed but clean shapes, dark forest green and muted antique gold palette, warm amber highlights, cinematic gentle light. Fictional comic character design, no actor likeness, no photography, no words, no lettering, no logos, no watermark, no UI, no borders. Wide landscape format 16:9. The Void at end of time, abandoned broken stone ruins and wrecked old machines among dark grassy hills, dramatic purple storm clouds, delicate green temporal rift, orange rectangular time portal in foreground. Beautiful moody, readable shapes, no horror, no characters. Detailed 2D painted game location background.",
+      "generated": true
+    }
+  ],
+  "note": "loki and classic are displayed from the previously generated variants-sheet.png; new portrait generations were rejected."
+}
