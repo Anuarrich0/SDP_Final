@@ -24,26 +24,47 @@ public final class TvaTheme {
     public static final Color GREEN = new Color(45, 114, 77);
     public static final Color AMBER = new Color(239, 159, 61);
     public static final Color MINT = new Color(133, 225, 163);
+
+    // Типографика собрана в одном месте: два семейства и несколько ступеней размера.
+    // Заголовки: 24-30 px, основной текст: 14-16 px, подписи: 12-13 px.
+    // DISPLAY - крупные декоративные числа (логотип, итоговая нестабильность).
+    public static final String HEADING_FAMILY = "Georgia";
+    public static final String BODY_FAMILY = "Segoe UI";
+    public static final int DISPLAY_LARGE = 42;
+    public static final int DISPLAY = 34;
+    public static final int HEADING_LARGE = 30;
+    public static final int HEADING = 28;
+    public static final int HEADING_SMALL = 24;
+    public static final int BODY = 16;
+    public static final int BODY_SMALL = 15;
+    public static final int LABEL = 13;
+    public static final int LABEL_SMALL = 12;
+    // Тёмная палитра ниже проверена на контраст: текст не сливается с фоном.
+
     private static final Map<String, BufferedImage> images = new HashMap<>();
 
     private TvaTheme() { }
 
+    public static Font headingFont(int size) { return new Font(HEADING_FAMILY, Font.BOLD, size); }
+    public static Font bodyFont(int size) { return new Font(BODY_FAMILY, Font.PLAIN, size); }
+    public static Font labelFont(int size) { return new Font(BODY_FAMILY, Font.BOLD, size); }
+
     public static JLabel label(String text, int size, Color color) {
         JLabel label = new JLabel(text);
-        label.setFont(new Font("Segoe UI", Font.PLAIN, size));
+        label.setFont(bodyFont(size));
         label.setForeground(color);
         return label;
     }
 
     public static JLabel heading(String text, int size) {
         JLabel label = label(text, size, TEXT);
-        label.setFont(new Font("Georgia", Font.BOLD, size));
+        label.setFont(headingFont(size));
         return label;
     }
 
     public static JTextArea text(String value, int size) {
         JTextArea text = new JTextArea(value);
-        text.setFont(new Font("Segoe UI", Font.PLAIN, size));
+        text.setFont(bodyFont(size));
         text.setForeground(MUTED);
         text.setOpaque(false);
         text.setEditable(false);
@@ -94,12 +115,49 @@ public final class TvaTheme {
 
     public static void styleCheckBox(JCheckBox item) {
         item.setOpaque(false);
-        item.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        item.setFont(labelFont(BODY_SMALL - 1));
         item.setIcon(new CheckIcon(false));
         item.setSelectedIcon(new CheckIcon(true));
         item.setIconTextGap(9);
         item.setFocusPainted(false);
         item.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    // Поля ввода и списки выглядывают из тёмной темы по умолчанию, поэтому красим их вручную.
+    public static void styleTextField(JTextField field) {
+        field.setFont(bodyFont(BODY));
+        field.setForeground(TEXT);
+        field.setBackground(PANEL);
+        field.setCaretColor(GOLD);
+        field.setSelectionColor(GREEN);
+        field.setSelectedTextColor(TEXT);
+        field.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(9, 12, 9, 12)));
+    }
+
+    public static void styleComboBox(JComboBox<?> box) {
+        box.setFont(bodyFont(BODY));
+        box.setForeground(TEXT);
+        box.setBackground(PANEL);
+        box.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(2, 4, 2, 4)));
+        box.setRenderer(new ComboRenderer());
+    }
+
+    private static final class ComboRenderer extends DefaultListCellRenderer {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                     boolean selected, boolean focused) {
+            JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, selected, focused);
+            label.setFont(bodyFont(BODY));
+            label.setOpaque(true);
+            label.setForeground(TEXT);
+            label.setBackground(selected ? GREEN : PANEL);
+            label.setBorder(new EmptyBorder(7, 10, 7, 10));
+            return label;
+        }
     }
 
     private record CheckIcon(boolean selected) implements Icon {
@@ -152,7 +210,7 @@ public final class TvaTheme {
                 super.paint(graphics, component);
             }
         });
-        button.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        button.setFont(labelFont(BODY_SMALL));
         button.setForeground(primary ? BACKGROUND : TEXT);
         button.setBorder(new EmptyBorder(14, 18, 14, 18));
         button.setContentAreaFilled(false);
@@ -188,8 +246,8 @@ public final class TvaTheme {
     public static JPanel stat(String name, int value, Color color) {
         JPanel panel = new JPanel(new BorderLayout(8, 4));
         panel.setOpaque(false);
-        panel.add(label(name, 14, TEXT), BorderLayout.WEST);
-        panel.add(label(Integer.toString(value), 16, GOLD), BorderLayout.EAST);
+        panel.add(label(name, BODY_SMALL - 1, TEXT), BorderLayout.WEST);
+        panel.add(label(Integer.toString(value), BODY, GOLD), BorderLayout.EAST);
         JProgressBar bar = new JProgressBar(0, 100);
         bar.setUI(new BasicProgressBarUI());
         bar.setValue(value);
@@ -224,7 +282,7 @@ public final class TvaTheme {
     }
 
     public static void install() {
-        Font font = new Font("Segoe UI", Font.PLAIN, 15);
+        Font font = bodyFont(BODY_SMALL);
         for (String name : new String[]{"Label", "Button", "ToggleButton", "ComboBox", "CheckBox", "TextField", "OptionPane"}) {
             UIManager.put(name + ".font", font);
             UIManager.put(name + ".background", PANEL);
@@ -236,6 +294,17 @@ public final class TvaTheme {
         UIManager.put("TextField.caretForeground", TEXT);
         UIManager.put("ComboBox.selectionBackground", GREEN);
         UIManager.put("ComboBox.selectionForeground", TEXT);
+        // Стрелка списка и его всплывающее окно тоже должны быть зелёно-золотыми, а не серыми.
+        UIManager.put("ComboBox.buttonBackground", PANEL);
+        UIManager.put("ComboBox.buttonHighlight", GOLD);
+        UIManager.put("ComboBox.buttonShadow", BORDER);
+        UIManager.put("ComboBox.buttonDarkShadow", BORDER);
+        UIManager.put("ComboBox.disabledBackground", PANEL);
+        UIManager.put("ComboBox.disabledForeground", MUTED);
+        UIManager.put("PopupMenu.background", PANEL);
+        UIManager.put("PopupMenu.border", BorderFactory.createLineBorder(BORDER));
+        UIManager.put("List.background", PANEL);
+        UIManager.put("List.foreground", TEXT);
         UIManager.put("List.selectionBackground", GREEN);
         UIManager.put("List.selectionForeground", TEXT);
         UIManager.put("ProgressBar.background", BACKGROUND);
@@ -315,7 +384,7 @@ public final class TvaTheme {
             super.paintComponent(graphics);
             Graphics2D g = (Graphics2D) graphics.create();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            g.setFont(bodyFont(LABEL));
             int width = getWidth(), height = getHeight();
             g.setColor(new Color(229, 184, 99, 24));
             for (int y = 20; y < height; y += 30) { g.drawLine(12, y, width - 12, y); }

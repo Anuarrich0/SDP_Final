@@ -14,23 +14,23 @@ public class GameWindow {
     private final MissionControlFacade control;
     private final CampaignStore store;
     private boolean savingEnabled = true;
-    private final JLabel saveStatus = TvaTheme.label("Прогресс сохраняется автоматически", 12, TvaTheme.MUTED);
+    private final JLabel saveStatus = TvaTheme.label("Прогресс сохраняется автоматически", TvaTheme.LABEL_SMALL, TvaTheme.MUTED);
     private final CardLayout layout = new CardLayout();
     private final JPanel screens = plain(new BorderLayout());
     private final JPanel home = plain(new BorderLayout(0, 20));
     private final JPanel results = plain(new BorderLayout(20, 20));
-    private final JLabel pageName = TvaTheme.label("ОПЕРАТИВНЫЙ ШТАБ", 12, TvaTheme.MUTED);
-    private final JLabel progress = TvaTheme.label("0 / 3", 28, TvaTheme.GOLD);
+    private final JLabel pageName = TvaTheme.label("ОПЕРАТИВНЫЙ ШТАБ", TvaTheme.LABEL_SMALL, TvaTheme.MUTED);
+    private final JLabel progress = TvaTheme.label("0 / 3", TvaTheme.HEADING_SMALL, TvaTheme.GOLD);
     private final JButton homeNav = TvaTheme.button("01    Миссии", false, this::goHome);
     private final JButton archiveNav = TvaTheme.button("02    Архив", false, this::goArchive);
     private final JButton variantNav = TvaTheme.button("Герои", false, this::goVariants);
     private MissionLocation selectedLocation = MissionLocation.NEW_YORK;
     private Mission preparedMission;
-    private final JLabel setupTitle = TvaTheme.heading("", 30);
-    private final JTextArea setupBriefing = TvaTheme.text("", 16);
+    private final JLabel setupTitle = TvaTheme.heading("", TvaTheme.HEADING_LARGE);
+    private final JTextArea setupBriefing = TvaTheme.text("", TvaTheme.BODY);
     private final JTextField missionTitle = new JTextField("Стабилизировать временную ветку");
     private final JComboBox<Difficulty> difficulty = new JComboBox<>(Difficulty.values());
-    private final JTextArea difficultyInfo = TvaTheme.text("", 16);
+    private final JTextArea difficultyInfo = TvaTheme.text("", TvaTheme.BODY);
     private final TvaTheme.ArtPanel setupArt = new TvaTheme.ArtPanel("new_york", 360, true);
     private final LokiCreator[] creators = {new LokiCreator.OrdinaryCreator(), new LokiCreator.ClassicCreator(),
             new LokiCreator.AlligatorCreator(), new LokiCreator.SylvieCreator()};
@@ -41,18 +41,18 @@ public class GameWindow {
     private final JCheckBox amplifier = new JCheckBox("Усилитель магии");
     private final JCheckBox amulet = new JCheckBox("Амулет переговоров");
     private final JCheckBox shield = new JCheckBox("Временной щит");
-    private final JTextArea heroPreview = TvaTheme.text("", 15);
-    private final JTextArea heroStats = TvaTheme.text("", 15);
+    private final JTextArea heroPreview = TvaTheme.text("", TvaTheme.BODY_SMALL);
+    private final JTextArea heroStats = TvaTheme.text("", TvaTheme.BODY_SMALL);
     private final JPanel heroMeters = plain(new GridLayout(3, 1, 0, 10));
-    private final JLabel sceneTitle = TvaTheme.heading("", 29);
-    private final JLabel sceneNumber = TvaTheme.label("", 12, TvaTheme.GOLD);
-    private final JLabel sceneLocation = TvaTheme.heading("", 28);
-    private final JTextArea sceneText = TvaTheme.text("", 16);
-    private final JTextArea sceneHint = TvaTheme.text("", 14);
-    private final JTextArea turnFeedback = TvaTheme.text("", 15);
-    private final JTextArea eventText = TvaTheme.text("", 14);
+    private final JLabel sceneTitle = TvaTheme.heading("", TvaTheme.HEADING);
+    private final JLabel sceneNumber = TvaTheme.label("", TvaTheme.LABEL_SMALL, TvaTheme.GOLD);
+    private final JLabel sceneLocation = TvaTheme.heading("", TvaTheme.HEADING);
+    private final JTextArea sceneText = TvaTheme.text("", TvaTheme.BODY);
+    private final JTextArea sceneHint = TvaTheme.text("", TvaTheme.BODY - 2);
+    private final JTextArea turnFeedback = TvaTheme.text("", TvaTheme.BODY_SMALL);
+    private final JTextArea eventText = TvaTheme.text("", TvaTheme.BODY - 2);
     private final JProgressBar instability = new JProgressBar(0, 100);
-    private final JLabel timelineStatus = TvaTheme.label("", 14, TvaTheme.GOLD);
+    private final JLabel timelineStatus = TvaTheme.label("", TvaTheme.BODY - 2, TvaTheme.GOLD);
     private final TimelineMonitor monitor = new TimelineMonitor(instability, timelineStatus);
     private final TvaTheme.ArtPanel sceneArt = new TvaTheme.ArtPanel("new_york", 185, true);
     private final TvaTheme.ArtPanel heroArt = new TvaTheme.ArtPanel("loki", 160, false);
@@ -64,7 +64,7 @@ public class GameWindow {
     private final JButton next = TvaTheme.button("Далее", false, this::nextScene);
     private final DefaultListModel<MissionResult> archiveModel = new DefaultListModel<>();
     private final JList<MissionResult> archiveList = new JList<>(archiveModel);
-    private final JTextArea archiveDetails = TvaTheme.text("Пока нет завершённых миссий.", 15);
+    private final JTextArea archiveDetails = TvaTheme.text("Пока нет завершённых миссий.", TvaTheme.BODY_SMALL);
     private final JPanel archiveChart = plain(new BorderLayout());
     private final JButton retryArchive = TvaTheme.button("Повторить миссию", true, this::retrySelected);
 
@@ -116,8 +116,8 @@ public class GameWindow {
         JPanel footer = plain(new BorderLayout(20, 0));
         footer.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, TvaTheme.BORDER),
                 new EmptyBorder(10, 20, 10, 24)));
-        progress.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        footer.add(TvaTheme.row(TvaTheme.label("КАМПАНИЯ", 12, TvaTheme.GOLD), progress), WEST);
+        progress.setFont(TvaTheme.labelFont(TvaTheme.HEADING_SMALL));
+        footer.add(TvaTheme.row(TvaTheme.label("КАМПАНИЯ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD), progress), WEST);
         footer.add(saveStatus, EAST);
         root.add(footer, SOUTH);
         frame.setContentPane(root);
@@ -136,14 +136,14 @@ public class GameWindow {
         JPanel header = plain(new BorderLayout());
         header.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, TvaTheme.BORDER),
                 new EmptyBorder(14, 25, 14, 25)));
-        JLabel brand = TvaTheme.heading("LOKI", 42);
+        JLabel brand = TvaTheme.heading("LOKI", TvaTheme.DISPLAY_LARGE);
         brand.setForeground(TvaTheme.GOLD);
-        header.add(TvaTheme.column(0, brand, TvaTheme.label("TVA  M I S S I O N S", 11, TvaTheme.GOLD)), WEST);
-        pageName.setFont(new Font("Georgia", Font.BOLD, 25));
+        header.add(TvaTheme.column(0, brand, TvaTheme.label("TVA  M I S S I O N S", TvaTheme.LABEL_SMALL, TvaTheme.GOLD)), WEST);
+        pageName.setFont(TvaTheme.headingFont(TvaTheme.HEADING_SMALL));
         pageName.setForeground(TvaTheme.TEXT);
         pageName.setHorizontalAlignment(SwingConstants.CENTER);
         header.add(pageName, CENTER);
-        JLabel tva = TvaTheme.heading("TVA", 34);
+        JLabel tva = TvaTheme.heading("TVA", TvaTheme.DISPLAY);
         tva.setForeground(TvaTheme.AMBER);
         header.add(tva, EAST);
         return header;
@@ -160,9 +160,9 @@ public class GameWindow {
             nav.setBorder(new EmptyBorder(22, 5, 22, 5));
             nav.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
         }
-        sidebar.add(TvaTheme.column(12, TvaTheme.label("TVA / 07", 14, TvaTheme.GOLD), homeNav, variantNav, archiveNav), NORTH);
-        sidebar.add(TvaTheme.column(10, TvaTheme.label("SECTOR 07", 11, TvaTheme.GOLD),
-                TvaTheme.text("Все ветки.\nВсе варианты.\nОдна миссия.", 12)), SOUTH);
+        sidebar.add(TvaTheme.column(12, TvaTheme.label("TVA / 07", TvaTheme.LABEL, TvaTheme.GOLD), homeNav, variantNav, archiveNav), NORTH);
+        sidebar.add(TvaTheme.column(10, TvaTheme.label("SECTOR 07", TvaTheme.LABEL_SMALL, TvaTheme.GOLD),
+                TvaTheme.text("Все ветки.\nВсе варианты.\nОдна миссия.", TvaTheme.LABEL)), SOUTH);
         return sidebar;
     }
 
@@ -197,18 +197,17 @@ public class GameWindow {
             TvaTheme.Surface card = TvaTheme.surface(10);
             card.putClientProperty("selected", selectedLocation == location);
             card.setLayout(new BorderLayout(0, 12));
-            card.add(TvaTheme.column(6, TvaTheme.label("ВЕТКА 0" + (location.ordinal() + 1), 11, TvaTheme.GOLD),
-                    TvaTheme.heading(location == MissionLocation.NEW_YORK ? "Нью-Йорк" : location.toString(), 22)), NORTH);
+            card.add(TvaTheme.column(6, TvaTheme.label("ВЕТКА 0" + (location.ordinal() + 1), TvaTheme.LABEL_SMALL, TvaTheme.GOLD),
+                    TvaTheme.heading(location == MissionLocation.NEW_YORK ? "Нью-Йорк" : location.toString(), TvaTheme.HEADING_SMALL)), NORTH);
             TvaTheme.ArtPanel art = new TvaTheme.ArtPanel(locationArt(location), 260, true);
-            JPanel caption = TvaTheme.column(4, TvaTheme.label(location == MissionLocation.NEW_YORK ? "2012 / ЗЕМЛЯ" : "ВНЕ ОСНОВНОЙ ВЕТКИ", 11, TvaTheme.GOLD),
-                    TvaTheme.label(completed.contains(location) ? "СТАБИЛИЗИРОВАНА" : unlocked ? "ДОСТУПНА" : "ЗАБЛОКИРОВАНА", 12, TvaTheme.TEXT));
+            JPanel caption = TvaTheme.column(4, TvaTheme.label(location == MissionLocation.NEW_YORK ? "2012 / ЗЕМЛЯ" : "ВНЕ ОСНОВНОЙ ВЕТКИ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD),
+                    TvaTheme.label(completed.contains(location) ? "СТАБИЛИЗИРОВАНА" : unlocked ? "ДОСТУПНА" : "ЗАБЛОКИРОВАНА", TvaTheme.LABEL_SMALL, TvaTheme.TEXT));
             caption.setBorder(new EmptyBorder(12, 12, 14, 12));
             art.add(caption, SOUTH);
             card.add(art, CENTER);
             JButton select = TvaTheme.button(selectedLocation == location ? "ВЫБРАНО" : "Выбрать ветку", false,
                     () -> { selectedLocation = location; refreshHome(); });
             select.setSelected(selectedLocation == location);
-            select.setFont(new Font("Segoe UI", Font.BOLD, 13));
             card.add(select, SOUTH);
             cards.add(card);
         }
@@ -217,15 +216,15 @@ public class GameWindow {
         TvaTheme.Surface dossier = TvaTheme.surface(20);
         dossier.setPreferredSize(new Dimension(290, 0));
         dossier.setLayout(new BorderLayout(0, 16));
-        JPanel branch = TvaTheme.column(6, TvaTheme.label("ВРЕМЕННЫЕ ВЕТКИ", 12, TvaTheme.GOLD),
+        JPanel branch = TvaTheme.column(6, TvaTheme.label("ВРЕМЕННЫЕ ВЕТКИ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD),
                 new TvaTheme.TimelinePanel(completed.size(), java.util.List.of()));
         dossier.add(branch, NORTH);
         JTextArea briefing = TvaTheme.text(selectedLocation.getBriefing()
                 + "\n\nЦЕЛЬ ОПЕРАЦИИ\nПройдите 3 сцены и снизьте нестабильность до 20 или ниже."
-                + "\n\nПРИ 100 — КОЛЛАПС\nПодбирайте тактику под способности выбранного Локи.", 15);
+                + "\n\nПРИ 100 — КОЛЛАПС\nПодбирайте тактику под способности выбранного Локи.", TvaTheme.BODY_SMALL);
         briefing.setRows(9);
         JPanel info = plain(new BorderLayout(0, 12));
-        info.add(TvaTheme.heading(selectedLocation.toString(), 23), NORTH);
+        info.add(TvaTheme.heading(selectedLocation.toString(), TvaTheme.HEADING_SMALL), NORTH);
         info.add(TvaTheme.scroll(briefing), CENTER);
         dossier.add(info, CENTER);
         JButton prepare = TvaTheme.button("Подготовить миссию  →", true, () -> prepare(selectedLocation));
@@ -234,9 +233,9 @@ public class GameWindow {
         center.add(dossier, EAST);
         home.add(center, CENTER);
         JPanel bottom = plain(new GridLayout(1, 3, 16, 0));
-        bottom.add(TvaTheme.label("01   СОБЕРИТЕ МИССИЮ", 12, TvaTheme.GOLD));
-        bottom.add(TvaTheme.label("02   ВЫБЕРИТЕ ВАРИАНТ", 12, TvaTheme.GOLD));
-        bottom.add(TvaTheme.label("03   ИЗМЕНИТЕ ВРЕМЯ", 12, TvaTheme.GOLD));
+        bottom.add(TvaTheme.label("01   СОБЕРИТЕ МИССИЮ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD));
+        bottom.add(TvaTheme.label("02   ВЫБЕРИТЕ ВАРИАНТ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD));
+        bottom.add(TvaTheme.label("03   ИЗМЕНИТЕ ВРЕМЯ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD));
         home.add(bottom, SOUTH);
         home.revalidate();
         home.repaint();
@@ -261,11 +260,12 @@ public class GameWindow {
         JPanel page = plain(new BorderLayout(24, 18));
         page.add(titleBlock("01 / ПОДГОТОВКА", "Соберите миссию", "Выберите сложность перед отправкой в другую реальность."), NORTH);
         JPanel fields = TvaTheme.column(16, setupTitle, setupBriefing,
-                TvaTheme.label("НАЗВАНИЕ МИССИИ", 11, TvaTheme.GOLD), missionTitle,
-                TvaTheme.label("СЛОЖНОСТЬ", 11, TvaTheme.GOLD), difficulty, difficultyInfo);
-        missionTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        missionTitle.setBorder(new EmptyBorder(10, 12, 10, 12));
-        difficulty.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+                TvaTheme.label("НАЗВАНИЕ МИССИИ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD), missionTitle,
+                TvaTheme.label("СЛОЖНОСТЬ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD), difficulty, difficultyInfo);
+        TvaTheme.styleTextField(missionTitle);
+        missionTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
+        TvaTheme.styleComboBox(difficulty);
+        difficulty.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         difficulty.setSelectedItem(Difficulty.STANDARD);
         difficulty.addActionListener(event -> updateDifficulty());
         setupBriefing.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
@@ -277,8 +277,8 @@ public class GameWindow {
         form.add(fields, NORTH);
         JPanel split = plain(new GridLayout(1, 2, 22, 0));
         split.add(form);
-        JPanel artCaption = TvaTheme.column(10, TvaTheme.heading("Одна миссия. Три решения.", 23),
-                TvaTheme.text("Успех снижает нестабильность на 25 / 25 / 20.\nНеудача добавляет 15; со щитом — 10.", 15));
+        JPanel artCaption = TvaTheme.column(10, TvaTheme.heading("Одна миссия. Три решения.", TvaTheme.HEADING_SMALL),
+                TvaTheme.text("Успех снижает нестабильность на 25 / 25 / 20.\nНеудача добавляет 15; со щитом — 10.", TvaTheme.BODY_SMALL));
         artCaption.setBorder(new EmptyBorder(22, 22, 22, 22));
         setupArt.add(artCaption, SOUTH);
         split.add(setupArt);
@@ -313,22 +313,23 @@ public class GameWindow {
             LokiVariant hero = creators[i].createVariant();
             TvaTheme.Surface card = TvaTheme.surface(10);
             card.setLayout(new BorderLayout(0, 12));
-            TvaTheme.ArtPanel portrait = new TvaTheme.ArtPanel(portraits[i], 270, false);
+            TvaTheme.ArtPanel portrait = new TvaTheme.ArtPanel(portraits[i], 250, false);
             card.add(portrait, CENTER);
             JToggleButton choose = TvaTheme.toggle("Выбрать");
             choose.setSelected(i == selectedHero);
             choose.addActionListener(event -> { selectedHero = index; updateHeroPreview(); });
             group.add(choose);
             JPanel details = plain(new BorderLayout(0, 9));
-            JTextArea name = TvaTheme.text(hero.getName(), 16);
+            JTextArea name = TvaTheme.text(hero.getName(), TvaTheme.BODY);
             name.setForeground(TvaTheme.TEXT);
-            name.setPreferredSize(new Dimension(100, 44));
+            name.setRows(2);
             details.add(name, NORTH);
             details.add(TvaTheme.column(7, TvaTheme.stat("Магия", hero.getMagicPower(), TvaTheme.MINT),
                     TvaTheme.stat("Бой", hero.getCombatPower(), TvaTheme.AMBER),
                     TvaTheme.stat("Переговоры", hero.getDiplomacy(), TvaTheme.GOLD)), CENTER);
             details.add(choose, SOUTH);
-            details.setPreferredSize(new Dimension(130, 224));
+            // Высота блока с именем и характеристиками ограничена: остальное оставляем портрету.
+            details.setPreferredSize(new Dimension(160, 224));
             card.add(details, SOUTH);
             heroCards[i] = card;
             cards.add(card);
@@ -336,18 +337,18 @@ public class GameWindow {
         JPanel center = plain(new BorderLayout(20, 0));
         center.add(cards, CENTER);
         TvaTheme.Surface equipment = TvaTheme.surface(16);
-        equipment.setPreferredSize(new Dimension(260, 0));
+        equipment.setPreferredSize(new Dimension(275, 0));
         equipment.setLayout(new BorderLayout(0, 16));
-        equipment.add(TvaTheme.column(14, TvaTheme.heading("Снаряжение", 24),
+        equipment.add(TvaTheme.column(14, TvaTheme.heading("Снаряжение", TvaTheme.HEADING_SMALL),
                 equipmentItem(amplifier, "+15 к магии"), equipmentItem(amulet, "+15 к переговорам"),
                 equipmentItem(shield, "Штраф за неудачу: +10 вместо +15")), NORTH);
-        equipment.add(TvaTheme.text("Улучшения суммируются.\n\nВыбирайте снаряжение под слабые стороны героя.", 14), CENTER);
+        equipment.add(TvaTheme.text("Улучшения суммируются.\n\nВыбирайте снаряжение под слабые стороны героя.", TvaTheme.BODY - 2), CENTER);
         center.add(equipment, EAST);
         page.add(center, CENTER);
         TvaTheme.Surface footer = TvaTheme.surface(14);
         footer.setLayout(new BorderLayout(18, 0));
         footer.add(TvaTheme.button("Назад", false, () -> showScreen("setup", "ПОДГОТОВКА / ПАРАМЕТРЫ МИССИИ")), WEST);
-        heroPreview.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        heroPreview.setFont(TvaTheme.bodyFont(TvaTheme.BODY_SMALL));
         footer.add(heroPreview, CENTER);
         footer.add(TvaTheme.button("Войти в портал  →", true, this::startMission), EAST);
         page.add(footer, SOUTH);
@@ -358,7 +359,7 @@ public class GameWindow {
     private JPanel equipmentItem(JCheckBox item, String description) {
         TvaTheme.styleCheckBox(item);
         item.addActionListener(event -> updateHeroPreview());
-        JTextArea detail = TvaTheme.text(description, 13);
+        JTextArea detail = TvaTheme.text(description, TvaTheme.BODY - 2);
         detail.setRows(2);
         TvaTheme.Surface panel = TvaTheme.surface(10);
         panel.setLayout(new BorderLayout(0, 8));
@@ -416,7 +417,7 @@ public class GameWindow {
             ActionStrategy strategy = strategies[i];
             JToggleButton choice = TvaTheme.toggle("<html><center>" + captions[i]
                     + "<br><br><font size='3'>" + descriptions[i] + "</font></center></html>");
-            choice.setFont(new Font("Georgia", Font.BOLD, 18));
+            choice.setFont(TvaTheme.headingFont(19));
             choice.setBorder(new EmptyBorder(12, 6, 12, 6));
             choice.addActionListener(event -> { selectedStrategy = strategy; confirm.setEnabled(true); });
             actionButtons[i] = choice;
@@ -426,7 +427,7 @@ public class GameWindow {
         choices.setPreferredSize(new Dimension(300, 90));
         sceneText.setRows(2);
         sceneText.setForeground(TvaTheme.TEXT);
-        sceneText.setFont(new Font("Segoe UI", Font.PLAIN, 17));
+        sceneText.setFont(TvaTheme.bodyFont(TvaTheme.BODY + 1));
         JPanel decision = plain(new BorderLayout(0, 10));
         decision.add(sceneText, NORTH);
         decision.add(choices, CENTER);
@@ -450,16 +451,16 @@ public class GameWindow {
         sidebar.setPreferredSize(new Dimension(215, 0));
         instability.setUI(new BasicProgressBarUI());
         instability.setStringPainted(true);
-        instability.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        instability.setFont(TvaTheme.labelFont(TvaTheme.LABEL_SMALL));
         instability.setBorderPainted(false);
         instability.setPreferredSize(new Dimension(200, 25));
         heroArt.setPreferredSize(new Dimension(180, 230));
         heroStats.setRows(2);
         heroStats.setForeground(TvaTheme.TEXT);
         sidebar.add(TvaTheme.column(10, heroStats, heroArt, heroMeters,
-                TvaTheme.label("НЕСТАБИЛЬНОСТЬ", 11, TvaTheme.GOLD), instability, timelineStatus), NORTH);
+                TvaTheme.label("НЕСТАБИЛЬНОСТЬ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD), instability, timelineStatus), NORTH);
         JPanel journal = plain(new BorderLayout(0, 8));
-        journal.add(TvaTheme.label("ЖУРНАЛ TVA", 11, TvaTheme.GOLD), NORTH);
+        journal.add(TvaTheme.label("ЖУРНАЛ TVA", TvaTheme.LABEL_SMALL, TvaTheme.GOLD), NORTH);
         journal.add(TvaTheme.scroll(eventText), CENTER);
         sidebar.add(journal, CENTER);
         page.add(sidebar, WEST);
@@ -529,17 +530,20 @@ public class GameWindow {
                 result.success() ? "Ветка под контролем. Операция завершена." : "Попробуйте другого героя или измените тактику."), NORTH);
         TvaTheme.ArtPanel art = new TvaTheme.ArtPanel(portraits[selectedHero], 400, true);
         art.setPreferredSize(new Dimension(230, 400));
-        JPanel caption = TvaTheme.column(6, TvaTheme.label("ВАРИАНТ TVA", 11, TvaTheme.GOLD),
-                TvaTheme.text(control.getHero().getName(), 22),
-                TvaTheme.label(result.getRank(), 14, result.success() ? TvaTheme.MINT : TvaTheme.AMBER));
+        JTextArea heroName = TvaTheme.text(control.getHero().getName(), TvaTheme.HEADING_SMALL);
+        heroName.setForeground(TvaTheme.TEXT);
+        heroName.setRows(2);
+        JPanel caption = TvaTheme.column(6, TvaTheme.label("ВАРИАНТ TVA", TvaTheme.LABEL_SMALL, TvaTheme.GOLD),
+                heroName,
+                TvaTheme.label(result.getRank(), TvaTheme.BODY - 2, result.success() ? TvaTheme.MINT : TvaTheme.AMBER));
         caption.setBorder(new EmptyBorder(18, 18, 24, 18));
         art.add(caption, SOUTH);
         JLabel score = TvaTheme.label(result.mission().getDifficulty().getStartingInstability()
-                + " → " + result.finalInstability(), 50, TvaTheme.GOLD);
+                + " → " + result.finalInstability(), TvaTheme.DISPLAY, TvaTheme.GOLD);
         score.setForeground(result.success() ? TvaTheme.MINT : TvaTheme.AMBER);
         TvaTheme.Surface scorePanel = TvaTheme.surface(18);
         scorePanel.setLayout(new BorderLayout(8, 4));
-        scorePanel.add(TvaTheme.label("НЕСТАБИЛЬНОСТЬ ВЕТКИ", 12, TvaTheme.GOLD), NORTH);
+        scorePanel.add(TvaTheme.label("НЕСТАБИЛЬНОСТЬ ВЕТКИ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD), NORTH);
         scorePanel.add(score, CENTER);
         scorePanel.setPreferredSize(new Dimension(300, 110));
         JPanel content = plain(new BorderLayout(16, 0));
@@ -550,11 +554,11 @@ public class GameWindow {
         for (TurnResult turn : result.turns()) {
             TvaTheme.Surface item = TvaTheme.surface(10);
             item.setLayout(new BorderLayout(8, 4));
-            item.add(TvaTheme.label("СЦЕНА 0" + turn.sceneNumber() + " / " + turn.action().action(), 16, TvaTheme.TEXT), NORTH);
+            item.add(TvaTheme.label("СЦЕНА 0" + turn.sceneNumber() + " / " + turn.action().action(), TvaTheme.BODY, TvaTheme.TEXT), NORTH);
             item.add(TvaTheme.text("Сила " + turn.action().score() + " / порог " + turn.action().threshold()
-                    + "\nНестабильность " + turn.before() + " → " + turn.after(), 14), CENTER);
+                    + "\nНестабильность " + turn.before() + " → " + turn.after(), TvaTheme.BODY - 2), CENTER);
             int delta = turn.after() - turn.before();
-            item.add(TvaTheme.label((delta > 0 ? "+" : "") + delta, 28,
+            item.add(TvaTheme.label((delta > 0 ? "+" : "") + delta, TvaTheme.HEADING_SMALL,
                     turn.action().success() ? TvaTheme.MINT : TvaTheme.AMBER), EAST);
             turns.add(item);
         }
@@ -564,12 +568,12 @@ public class GameWindow {
         TvaTheme.Surface timeline = TvaTheme.surface(18);
         timeline.setPreferredSize(new Dimension(260, 0));
         timeline.setLayout(new BorderLayout(0, 16));
-        timeline.add(TvaTheme.label("ХОД ОПЕРАЦИИ", 13, TvaTheme.GOLD), NORTH);
+        timeline.add(TvaTheme.label("ХОД ОПЕРАЦИИ", TvaTheme.LABEL, TvaTheme.GOLD), NORTH);
         JPanel charts = plain(new GridLayout(2, 1, 0, 20));
         charts.add(new TvaTheme.TimelinePanel(0, historyValues(result)));
         charts.add(new TvaTheme.TimelinePanel(result.success() ? 3 : 0, java.util.List.of()));
         timeline.add(charts, CENTER);
-        JTextArea missionName = TvaTheme.text(result.mission().getTitle() + "\n\n" + result.hero(), 14);
+        JTextArea missionName = TvaTheme.text(result.mission().getTitle() + "\n\n" + result.hero(), TvaTheme.BODY - 2);
         missionName.setRows(4);
         timeline.add(missionName, SOUTH);
         report.add(timeline, EAST);
@@ -601,7 +605,7 @@ public class GameWindow {
                 MissionResult result = (MissionResult) value;
                 label.setText("<html><b>" + result.mission().getLocation() + "</b><br>" + result.mission().getDifficulty()
                         + " / " + (result.success() ? "Успех" : "Провал") + " / " + result.finalInstability() + " из 100</html>");
-                label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+                label.setFont(TvaTheme.bodyFont(TvaTheme.BODY_SMALL));
                 label.setBorder(new EmptyBorder(12, 16, 12, 16));
                 return label;
             }
@@ -621,7 +625,7 @@ public class GameWindow {
         entries.add(TvaTheme.scroll(archiveList), CENTER);
         TvaTheme.Surface detail = TvaTheme.surface(24);
         detail.setLayout(new BorderLayout(0, 16));
-        detail.add(TvaTheme.label("ДОСЬЕ ОПЕРАЦИИ", 11, TvaTheme.GOLD), NORTH);
+        detail.add(TvaTheme.label("ДОСЬЕ ОПЕРАЦИИ", TvaTheme.LABEL_SMALL, TvaTheme.GOLD), NORTH);
         detail.add(TvaTheme.scroll(archiveDetails), CENTER);
         archiveChart.setPreferredSize(new Dimension(200, 175));
         detail.add(archiveChart, SOUTH);
@@ -698,8 +702,9 @@ public class GameWindow {
     }
 
     private static JPanel titleBlock(String eyebrow, String title, String description) {
-        return TvaTheme.column(6, TvaTheme.label(eyebrow, 10, TvaTheme.GOLD), TvaTheme.heading(title, 29),
-                TvaTheme.label(description, 14, TvaTheme.MUTED));
+        return TvaTheme.column(6, TvaTheme.label(eyebrow, TvaTheme.LABEL_SMALL, TvaTheme.GOLD),
+                TvaTheme.heading(title, TvaTheme.HEADING_LARGE),
+                TvaTheme.label(description, TvaTheme.BODY - 2, TvaTheme.MUTED));
     }
 
     private static JPanel plain(LayoutManager manager) {
