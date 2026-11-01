@@ -41,9 +41,24 @@ public class UiChecks {
                 assert control.getResult().success() && control.getResult().finalInstability() == 0;
                 assert new CampaignStore(save).load().size() == 1;
                 capture(frame, "05-result");
+                click(frame.getContentPane(), "Следующая миссия  →");
+                assert field(window, "selectedLocation", MissionLocation.class) == MissionLocation.ASGARD;
                 call(window, "goArchive", new Class<?>[0]);
                 assert field(window, "archiveModel", DefaultListModel.class).getSize() == 1;
                 capture(frame, "06-archive");
+                click(frame.getContentPane(), "Миссии");
+                click(frame.getContentPane(), "Герои");
+                assert field(window, "preparedMission", Mission.class).getLocation() == MissionLocation.ASGARD;
+                call(window, "prepare", new Class<?>[]{MissionLocation.class}, MissionLocation.NEW_YORK);
+                click(frame.getContentPane(), "Выбрать вариант Локи  →");
+                click(cards[1], "Выбрать");
+                click(frame.getContentPane(), "Войти в портал  →");
+                actions[1].doClick();
+                field(window, "confirm", JButton.class).doClick();
+                field(window, "next", JButton.class).doClick();
+                assert control.getSceneNumber() == 2 && control.getHero().getName().equals("Классический Локи");
+                capture(frame, "07-classic-encounter");
+                control.abortMission();
                 GameWindow reopened = new GameWindow(save);
                 try {
                     MissionControlFacade reloaded = field(reopened, "control", MissionControlFacade.class);
@@ -51,7 +66,7 @@ public class UiChecks {
                 } finally { field(reopened, "frame", JFrame.class).dispose(); }
                 Files.delete(save);
                 Files.delete(save.getParent());
-                System.out.println("PASS: six Swing screens at two sizes, Sylvie/amulet mission, saved campaign restart");
+                System.out.println("PASS: six screens at two sizes, navigation, next mission, Classic encounter, saved restart");
             } catch (Exception error) { throw new AssertionError(error); }
             finally { if (frame != null) { frame.dispose(); } }
         });

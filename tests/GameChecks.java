@@ -26,11 +26,11 @@ public class GameChecks {
     }
 
     private static void checkArtwork() {
-        for (String name : new String[]{"new_york", "asgard", "void", "alligator", "sylvie", "variants-sheet"}) {
+        for (String name : new String[]{"new_york", "asgard", "void", "alligator", "sylvie", "variants-sheet", "encounter-sheet"}) {
             java.awt.image.BufferedImage image = TvaTheme.image(name);
             assert image.getWidth() >= 200 && image.getHeight() >= 200 : name;
         }
-        for (String name : new String[]{"loki", "classic", "alligator", "sylvie", "new_york"}) {
+        for (String name : new String[]{"loki", "classic", "alligator", "sylvie", "new_york", "encounter"}) {
             TvaTheme.ArtPanel panel = new TvaTheme.ArtPanel(name, 160, true);
             panel.setSize(280, 160);
             java.awt.image.BufferedImage rendered = new java.awt.image.BufferedImage(280, 160,

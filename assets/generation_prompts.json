@@ -37,5 +37,12 @@
       "generated": true
     }
   ],
-  "note": "loki and classic are displayed from the previously generated variants-sheet.png; new portrait generations were rejected."
+  "note": "loki and classic are displayed from the previously generated variants-sheet.png; new portrait generations were rejected.",
+  "reused_assets": [
+    {
+      "usage": "Artwork rectangle only; live UI is rendered by Swing",
+      "file": "encounter-sheet.png",
+      "source": "Original 04_encounter concept"
+    }
+  ]
 }

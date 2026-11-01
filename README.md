@@ -24,7 +24,12 @@ After confirming an action, use Next to continue. Finish three scenes with insta
 Reaching 100 ends the attempt immediately. Successful missions unlock Asgard, then the Void.
 
 The Swing interface includes headquarters, mission setup, loadout, encounters, results and archive,
-with illustrated location cards, character portraits and a live instability monitor.
+with gold TVA frames, illustrated location cards, four portrait cards in one row,
+equipment cards and a live instability monitor. Headquarters shows the selected mission's briefing
+beside the location cards. The encounter screen places the hero on the left and the scene above
+three action cards. Classic Loki's second New York encounter reuses the original concept artwork.
+Results and the archive plot the actual instability values for each turn. A successful operation
+offers a button to prepare the next mission.
 
 Completed attempts and unlocked locations are saved automatically after a mission and on exit.
 The save file is `%USERPROFILE%/.loki-tva/campaign.xml`; hover over the footer to see its full path.

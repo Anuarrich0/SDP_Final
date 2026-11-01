@@ -2,7 +2,10 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.plaf.basic.BasicProgressBarUI;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
+import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -12,14 +15,15 @@ import java.util.Map;
 
 // Общие цвета и реальные повторяющиеся элементы шести экранов.
 public final class TvaTheme {
-    public static final Color BACKGROUND = new Color(13, 23, 21);
-    public static final Color PANEL = new Color(23, 39, 33);
-    public static final Color BORDER = new Color(52, 69, 57);
-    public static final Color TEXT = new Color(239, 235, 217);
-    public static final Color MUTED = new Color(151, 168, 155);
-    public static final Color GOLD = new Color(214, 177, 99);
-    public static final Color GREEN = new Color(51, 123, 86);
-    public static final Color AMBER = new Color(222, 139, 77);
+    public static final Color BACKGROUND = new Color(8, 20, 18);
+    public static final Color PANEL = new Color(15, 33, 29);
+    public static final Color BORDER = new Color(133, 105, 54);
+    public static final Color TEXT = new Color(246, 237, 211);
+    public static final Color MUTED = new Color(181, 189, 174);
+    public static final Color GOLD = new Color(229, 184, 99);
+    public static final Color GREEN = new Color(45, 114, 77);
+    public static final Color AMBER = new Color(239, 159, 61);
+    public static final Color MINT = new Color(133, 225, 163);
     private static final Map<String, BufferedImage> images = new HashMap<>();
 
     private TvaTheme() { }
@@ -46,6 +50,7 @@ public final class TvaTheme {
         text.setLineWrap(true);
         text.setWrapStyleWord(true);
         text.setBorder(null);
+        text.setSelectionColor(GREEN);
         return text;
     }
 
@@ -87,6 +92,30 @@ public final class TvaTheme {
         return button;
     }
 
+    public static void styleCheckBox(JCheckBox item) {
+        item.setOpaque(false);
+        item.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        item.setIcon(new CheckIcon(false));
+        item.setSelectedIcon(new CheckIcon(true));
+        item.setIconTextGap(9);
+        item.setFocusPainted(false);
+        item.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    private record CheckIcon(boolean selected) implements Icon {
+        public int getIconWidth() { return 23; }
+        public int getIconHeight() { return 23; }
+        public void paintIcon(Component component, Graphics graphics, int x, int y) {
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setColor(selected ? GREEN : BACKGROUND); g.fillRect(x + 1, y + 1, 20, 20);
+            g.setColor(selected ? MINT : BORDER); g.setStroke(new BasicStroke(2f));
+            g.drawRect(x + 1, y + 1, 20, 20);
+            if (selected) { g.drawLine(x + 5, y + 11, x + 10, y + 16); g.drawLine(x + 10, y + 16, x + 18, y + 6); }
+            g.dispose();
+        }
+    }
+
     private static void styleButton(AbstractButton button, boolean primary) {
         button.setUI(new BasicButtonUI() {
             @Override
@@ -107,17 +136,25 @@ public final class TvaTheme {
                 if (button.getModel().isRollover() && button.isEnabled()) { fill = fill.brighter(); }
                 if (button.getModel().isPressed()) { fill = fill.darker(); }
                 if (!button.isEnabled()) { fill = new Color(37, 47, 41); }
-                g.setColor(fill);
-                g.fillRoundRect(0, 0, component.getWidth(), component.getHeight(), 12, 12);
-                g.setColor(button.hasFocus() || selected ? GOLD : BORDER);
-                g.drawRoundRect(1, 1, component.getWidth() - 3, component.getHeight() - 3, 12, 12);
+                Color top = primary && button.isEnabled() ? new Color(247, 203, 129) : fill.brighter();
+                Color bottom = primary && button.isEnabled() ? new Color(183, 128, 49) : fill.darker();
+                g.setPaint(new GradientPaint(0, 0, top, 0, component.getHeight(), bottom));
+                Shape face = frameShape(component.getWidth(), component.getHeight(), 1);
+                g.fill(face);
+                g.setStroke(new BasicStroke(button.hasFocus() || selected ? 2f : 1f));
+                g.setColor(selected ? MINT : primary || button.hasFocus() ? GOLD : BORDER);
+                g.draw(face);
+                if (primary && button.isEnabled()) {
+                    g.setColor(new Color(255, 226, 161, 100));
+                    g.draw(frameShape(component.getWidth(), component.getHeight(), 4));
+                }
                 g.dispose();
                 super.paint(graphics, component);
             }
         });
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 15));
         button.setForeground(primary ? BACKGROUND : TEXT);
-        button.setBorder(new EmptyBorder(12, 18, 12, 18));
+        button.setBorder(new EmptyBorder(14, 18, 14, 18));
         button.setContentAreaFilled(false);
         button.setOpaque(false);
         button.setFocusPainted(false);
@@ -131,7 +168,47 @@ public final class TvaTheme {
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
         scroll.getVerticalScrollBar().setUnitIncrement(20);
+        scroll.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() { thumbColor = BORDER; trackColor = BACKGROUND; }
+            @Override
+            protected JButton createDecreaseButton(int orientation) { return hiddenButton(); }
+            @Override
+            protected JButton createIncreaseButton(int orientation) { return hiddenButton(); }
+            private JButton hiddenButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                return button;
+            }
+        });
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return scroll;
+    }
+
+    public static JPanel stat(String name, int value, Color color) {
+        JPanel panel = new JPanel(new BorderLayout(8, 4));
+        panel.setOpaque(false);
+        panel.add(label(name, 14, TEXT), BorderLayout.WEST);
+        panel.add(label(Integer.toString(value), 16, GOLD), BorderLayout.EAST);
+        JProgressBar bar = new JProgressBar(0, 100);
+        bar.setUI(new BasicProgressBarUI());
+        bar.setValue(value);
+        bar.setForeground(color);
+        bar.setBackground(BACKGROUND);
+        bar.setBorder(BorderFactory.createLineBorder(BORDER));
+        bar.setPreferredSize(new Dimension(50, 6));
+        panel.add(bar, BorderLayout.SOUTH);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        return panel;
+    }
+
+    private static Shape frameShape(int width, int height, int inset) {
+        int right = width - inset - 1, bottom = height - inset - 1, corner = 8;
+        Path2D shape = new Path2D.Double();
+        shape.moveTo(inset + corner, inset); shape.lineTo(right, inset);
+        shape.lineTo(right, bottom - corner); shape.lineTo(right - corner, bottom);
+        shape.lineTo(inset, bottom); shape.lineTo(inset, inset + corner); shape.closePath();
+        return shape;
     }
 
     public static BufferedImage image(String name) {
@@ -179,12 +256,96 @@ public final class TvaTheme {
         protected void paintComponent(Graphics graphics) {
             Graphics2D g = (Graphics2D) graphics.create();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setColor(PANEL);
-            g.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
-            g.setColor(Boolean.TRUE.equals(getClientProperty("selected")) ? GOLD : BORDER);
-            g.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 18, 18);
+            boolean selected = Boolean.TRUE.equals(getClientProperty("selected"));
+            g.setPaint(new GradientPaint(0, 0, selected ? new Color(27, 63, 43) : PANEL,
+                    getWidth(), getHeight(), BACKGROUND));
+            g.fill(frameShape(getWidth(), getHeight(), 2));
+            if (selected) {
+                g.setColor(new Color(229, 184, 99, 45));
+                g.setStroke(new BasicStroke(7f));
+                g.draw(frameShape(getWidth(), getHeight(), 4));
+            }
+            g.setStroke(new BasicStroke(selected ? 2f : 1f));
+            g.setColor(selected ? GOLD : BORDER);
+            g.draw(frameShape(getWidth(), getHeight(), 2));
             g.dispose();
             super.paintComponent(graphics);
+        }
+    }
+
+    public static final class Backdrop extends JPanel {
+        private static final long serialVersionUID = 1L;
+        public Backdrop() { super(new BorderLayout()); }
+        @Override
+        public void paint(Graphics graphics) {
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+            super.paint(g);
+            g.dispose();
+        }
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            super.paintComponent(graphics);
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.drawImage(TvaTheme.image("new_york"), 0, 0, getWidth(), getHeight(), null);
+            g.setPaint(new GradientPaint(0, 0, new Color(5, 18, 16, 242), getWidth(), getHeight(), new Color(5, 18, 16, 213)));
+            g.fillRect(0, 0, getWidth(), getHeight());
+            g.setColor(new Color(229, 184, 99, 30));
+            for (int y = 100; y < getHeight(); y += 110) {
+                g.drawLine(0, y, 30, y); g.drawLine(30, y, 52, y + 22);
+                g.drawLine(52, y + 22, 100, y + 22);
+            }
+            g.dispose();
+        }
+    }
+
+    public static final class TimelinePanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        private final transient java.util.List<Integer> values;
+        private final int completed;
+        public TimelinePanel(int completed, java.util.List<Integer> values) {
+            this.completed = completed;
+            this.values = java.util.List.copyOf(values);
+            setOpaque(false);
+            setPreferredSize(new Dimension(220, 130));
+        }
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            super.paintComponent(graphics);
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            int width = getWidth(), height = getHeight();
+            g.setColor(new Color(229, 184, 99, 24));
+            for (int y = 20; y < height; y += 30) { g.drawLine(12, y, width - 12, y); }
+            if (values.isEmpty()) {
+                for (int branch = 0; branch < 3; branch++) {
+                    Path2D path = new Path2D.Double();
+                    path.moveTo(14, height / 2.0);
+                    path.curveTo(width * .36, height / 2.0, width * .5, 22 + branch * (height - 44) / 2.0,
+                            width - 20, 22 + branch * (height - 44) / 2.0);
+                    g.setColor(branch < completed ? MINT : GOLD);
+                    g.setStroke(new BasicStroke(branch < completed ? 3f : 1.5f)); g.draw(path);
+                    int y = 22 + branch * (height - 44) / 2;
+                    g.fillOval(width - 25, y - 5, 10, 10);
+                }
+                g.setColor(GOLD); g.fillOval(9, height / 2 - 5, 10, 10);
+            } else {
+                int previousX = 0, previousY = 0;
+                for (int i = 0; i < values.size(); i++) {
+                    int x = 24 + i * (width - 48) / Math.max(1, values.size() - 1);
+                    int y = 24 + (100 - values.get(i)) * Math.max(1, height - 64) / 100;
+                    g.setColor(values.get(i) <= 20 ? MINT : GOLD);
+                    g.setStroke(new BasicStroke(2.5f));
+                    if (i > 0) { g.drawLine(previousX, previousY, x, y); }
+                    g.fillOval(x - 4, y - 4, 8, 8);
+                    g.drawString(Integer.toString(values.get(i)), x - 9, y - 10);
+                    g.setColor(MUTED); g.drawString(i == 0 ? "Старт" : "0" + i, x - 14, height - 8);
+                    previousX = x; previousY = y;
+                }
+            }
+            g.dispose();
         }
     }
 
@@ -203,7 +364,9 @@ public final class TvaTheme {
 
         public void setAsset(String asset) {
             // Два портрета берём из исходного концепт-листа как из sprite atlas.
-            if (asset.equals("loki") || asset.equals("classic")) {
+            if (asset.equals("encounter")) {
+                image = TvaTheme.image("encounter-sheet").getSubimage(350, 148, 1290, 398);
+            } else if (asset.equals("loki") || asset.equals("classic")) {
                 BufferedImage sheet = TvaTheme.image("variants-sheet");
                 int x = asset.equals("loki") ? 175 : 550;
                 int y = asset.equals("loki") ? 125 : 100;
@@ -218,7 +381,7 @@ public final class TvaTheme {
             Graphics2D g = (Graphics2D) graphics.create();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.clip(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 18, 18));
+            g.clip(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 5, 5));
             double scale = Math.max((double) getWidth() / image.getWidth(), (double) getHeight() / image.getHeight());
             int width = (int) Math.ceil(image.getWidth() * scale);
             int height = (int) Math.ceil(image.getHeight() * scale);
