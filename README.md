@@ -1,80 +1,70 @@
-# Team: SE-2534
-# Members: Ailbekov Maksat, Nurlybek Anuar
-# SDP_Final
+# Loki TVA Escape
 
-TVA mission simulator with Loki variants. Java Swing final project for SDP.
+Игра с видом сверху на Java 21 и LibGDX 1.14.0. Сборка через Maven.
 
-Requires JDK 21 or newer. No external libraries.
+## Запуск
 
-On Windows, run `run.cmd`. Or run from the project folder:
-
-```powershell
-javac -encoding UTF-8 -d out src/*.java
-New-Item -ItemType Directory -Force out/assets | Out-Null
-Copy-Item assets/*.png out/assets
-java -cp out Main
-```
-
-## Gameplay
-
-Choose a mission and difficulty, select Loki and equipment, then choose one action per scene.
-Four variants are available: Ordinary, Classic, Alligator and Sylvie (magic 65 / combat 45 / diplomacy 55).
-Equipment includes the magic amplifier, the diplomacy amulet (+15 to diplomacy) and the time shield.
-After confirming an action, use Next to continue. Finish three scenes with instability at 20 or below.
-Reaching 100 ends the attempt immediately. Successful missions unlock Asgard, then the Void.
-
-The Swing interface includes headquarters, mission setup, loadout, encounters, results and archive,
-with gold TVA frames, illustrated location cards, four portrait cards in one row,
-equipment cards and a live instability monitor. Headquarters shows the selected mission's briefing
-beside the location cards. The encounter screen places the hero on the left and the scene above
-three action cards. Classic Loki's second New York encounter reuses the original concept artwork.
-Results and the archive plot the actual instability values for each turn. A successful operation
-offers a button to prepare the next mission.
-
-Completed attempts and unlocked locations are saved automatically after a mission and on exit.
-The save file is `%USERPROFILE%/.loki-tva/campaign.xml`; hover over the footer to see its full path.
-An unfinished mission is discarded when you confirm leaving it. It does not enter the archive.
-If the save cannot be read, the game warns you and leaves that file untouched. Move the damaged
-file elsewhere and restart to create a fresh campaign. Write failures are shown in the window;
-you can retry on exit or explicitly choose to leave without saving the latest results.
-
-## Design patterns
-
-| Pattern | Classes | Use |
-| --- | --- | --- |
-| Builder | `Mission.Builder` | Assemble and validate mission settings |
-| Factory Method | `LokiCreator` and its four creators | Create different Loki variants through an overridden method |
-| Decorator | `EquipmentDecorator`, `MagicAmplifier`, `DiplomacyAmulet`, `TimeShield` | Add magic power, diplomacy and reduce failure penalties |
-| Strategy | `ActionStrategy`, `NegotiateStrategy`, `IllusionStrategy`, `CombatStrategy` | Resolve actions using different hero stats |
-| Facade | `MissionControlFacade` | Start missions, resolve turns, unlock locations and store results |
-| Observer | `Timeline`, `TimelineListener`, `TimelineMonitor`, `EventLog` | Update the Swing monitor and event log when instability changes |
-
-`GameWindow` sends actions to the facade. The chosen strategy reads the equipped hero's stats.
-The facade changes the timeline, which notifies the monitor and log.
-Gameplay calculations can run without opening a window.
-
-## Checks
-
-Run `check.cmd` for the headless logic and artwork checks.
-Run `check.cmd --ui` to also exercise all six Swing screens, a Sylvie mission and a campaign restart.
-The UI check uses its own hidden window and temporary save; renders are written to `out/ui/`.
-Manual PowerShell commands:
+Открой корневой `pom.xml` в IDE как Maven-проект. Для проекта и Maven выбери JDK 21.
+В Windows запусти `run.cmd`: он соберёт проект и откроет игру.
+При первом запуске Maven скачает зависимости.
 
 ```powershell
-javac -encoding UTF-8 -Xlint:all -Werror -d out src/*.java tests/*.java
-New-Item -ItemType Directory -Force out/assets | Out-Null
-Copy-Item assets/*.png out/assets
-java -ea -Djava.awt.headless=true -cp out GameChecks
+.\run.cmd
 ```
 
-The checks cover all six patterns, campaign progression, failed attempts, retry, shield penalties,
-observer subscription/removal, limits 0-100, duplicate actions and immutable archived results.
-They also verify the Sylvie creator, the diplomacy amulet (55 -> 70, other stats unchanged),
-its combination with the amplifier and shield, and that Sylvie passes the Standard diplomacy
-threshold in a scene without a modifier.
-Save checks cover archive round trips, UTF-8 mission names, unlocked locations, early collapse,
-discarded attempts and damaged files. `CampaignStore` uses the JDK XML Properties format and
-replaces the save via a temporary file; the six gameplay patterns keep their existing roles.
+## Управление
 
-For a successful first mission: Standard difficulty, Classic Loki, Magic amplifier,
-then Illusion / Illusion / Negotiate. Instability: 70 -> 45 -> 20 -> 0.
+| Клавиша | Действие |
+| --- | --- |
+| WASD или стрелки | Движение |
+| SPACE | Рывок |
+| E | Иллюзия |
+| ESC | Пауза |
+| R | Новая попытка |
+
+Собери три заряда и доберись до портала. Охранники патрулируют, замечают цель
+без стены между ней и собой, обходят препятствия и проверяют последнее увиденное
+место. Видимая иллюзия отвлекает их. Щит уменьшает урон, усилитель магии продлевает
+жизнь иллюзии.
+
+## Структура
+
+```text
+src/loki/   все Java-классы игры
+assets/     Локи, охранник и интерьер
+pom.xml     зависимости и настройки сборки
+run.cmd     запуск игры
+README.md   описание проекта
+```
+
+Начни с `GameLauncher.java` — он открывает окно игры.
+`GameScreen` отвечает за картинку и клавиши, `GameSession` — за правила.
+`Player` и `Guard` — персонажи, `Level` — карта. Остальные классы реализуют паттерны.
+Карту можно изменить в `Level.training()`.
+
+## Паттерны
+
+| Паттерн | Классы |
+| --- | --- |
+| Builder | `Level.Builder` |
+| Factory Method | `LokiCreator` и его Creator-классы |
+| Decorator | `EquipmentDecorator`, `MagicAmplifier`, `TimeShield` |
+| Strategy | `GuardStrategy`, `PatrolStrategy`, `ChaseStrategy` |
+| Facade | `GameSession` |
+| Observer | `GameListener` и подписка HUD в `GameScreen` |
+
+## Сборка
+
+```powershell
+mvn clean package
+```
+
+Готовый JAR-файл появится в папке `target`. Для запуска используй `run.cmd`.
+
+Локи нарисован в Canva и анимирован в четырёх направлениях: три кадра для каждого.
+Шаги зависят от реального движения, при остановке направление сохраняется.
+Охранник анимирован в четырёх направлениях: стойка и две фазы шага.
+Пол и стены используют детализированные тайлы TVA из Canva; портал и TemPad тоже имеют свои текстуры.
+Ссылки на редактируемые рисунки находятся в assets/README.md.
+Сейчас одна карта; меню и сохранения ещё не реализованы.
+Старую версию проекта можно найти в истории Git.
