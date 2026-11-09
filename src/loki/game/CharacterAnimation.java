@@ -1,5 +1,4 @@
-package loki;
-
+package loki.game;
 public final class CharacterAnimation {
     public enum Direction { DOWN, UP, RIGHT, LEFT }
 

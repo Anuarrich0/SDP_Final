@@ -1,4 +1,7 @@
-package loki;
+package loki.game;
+
+import loki.builder.Level;
+import loki.factory.LokiVariant;
 import java.util.Objects;
 
 public final class Player {

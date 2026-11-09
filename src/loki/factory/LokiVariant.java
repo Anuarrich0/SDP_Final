@@ -1,5 +1,4 @@
-package loki;
-
+package loki.factory;
 public interface LokiVariant {
     String getName();
     int getMagicPower();

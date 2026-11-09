@@ -1,5 +1,12 @@
-package loki;
+package loki.game;
 
+import loki.builder.Level;
+import loki.decorator.MagicAmplifier;
+import loki.decorator.TimeShield;
+import loki.facade.GameSession;
+import loki.factory.LokiCreator;
+import loki.factory.LokiVariant;
+import loki.observer.GameListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;

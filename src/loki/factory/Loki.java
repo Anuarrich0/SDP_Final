@@ -1,5 +1,4 @@
-package loki;
-
+package loki.factory;
 public class Loki implements LokiVariant {
     private final String name;
     private final int magicPower;

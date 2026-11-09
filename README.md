@@ -30,28 +30,39 @@
 ## Структура
 
 ```text
-src/loki/   все Java-классы игры
-assets/     Локи, охранник и интерьер
-pom.xml     зависимости и настройки сборки
-run.cmd     запуск игры
-README.md   описание проекта
+src/loki/
+  GameLauncher.java   main, запуск окна
+  game/               экран, персонажи, анимация
+  builder/            создание карты
+  factory/            создание вариантов Локи
+  decorator/          усиления и щит
+  strategy/           поведение охранников
+  facade/             общие правила игры
+  observer/           уведомления об изменении игры
+assets/               изображения и ссылки на Canva
+pom.xml               зависимости и сборка
+run.cmd               запуск игры
 ```
 
-Начни с `GameLauncher.java` — он открывает окно игры.
-`GameScreen` отвечает за картинку и клавиши, `GameSession` — за правила.
-`Player` и `Guard` — персонажи, `Level` — карта. Остальные классы реализуют паттерны.
-Карту можно изменить в `Level.training()`.
+Начни с `src/loki/GameLauncher.java`: он открывает окно.
+В `game/GameScreen.java` находятся отрисовка и клавиши, а правила —
+в `facade/GameSession.java`. Карту можно изменить в `builder/Level.java`,
+метод `training()`.
 
 ## Паттерны
 
-| Паттерн | Классы |
-| --- | --- |
-| Builder | `Level.Builder` |
-| Factory Method | `LokiCreator` и его Creator-классы |
-| Decorator | `EquipmentDecorator`, `MagicAmplifier`, `TimeShield` |
-| Strategy | `GuardStrategy`, `PatrolStrategy`, `ChaseStrategy` |
-| Facade | `GameSession` |
-| Observer | `GameListener` и подписка HUD в `GameScreen` |
+| Папка | Паттерн | Классы |
+| --- | --- | --- |
+| `builder` | Builder | `Level`, внутри него `Level.Builder` |
+| `factory` | Factory Method | `LokiCreator`, его Creator-классы, `Loki` и `LokiVariant` |
+| `decorator` | Decorator | `EquipmentDecorator`, `MagicAmplifier`, `TimeShield` |
+| `strategy` | Strategy | `GuardStrategy`, `PatrolStrategy`, `ChaseStrategy` |
+| `facade` | Facade | `GameSession` |
+| `observer` | Observer | `GameListener` |
+
+Паттерны работают вместе: `GameSession` из Facade отправляет события
+через `GameListener`, а `GameScreen` подписывается и обновляет HUD.
+Поэтому источник событий и подписчик находятся в своих игровых классах.
 
 ## Сборка
 

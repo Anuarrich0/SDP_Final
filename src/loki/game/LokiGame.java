@@ -1,4 +1,4 @@
-package loki;
+package loki.game;
 import com.badlogic.gdx.Game;
 
 public final class LokiGame extends Game {

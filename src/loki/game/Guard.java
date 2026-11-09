@@ -1,5 +1,9 @@
-package loki;
+package loki.game;
 
+import loki.builder.Level;
+import loki.factory.Loki;
+import loki.strategy.GuardStrategy;
+import loki.strategy.PatrolStrategy;
 import java.util.List;
 import java.util.Objects;
 

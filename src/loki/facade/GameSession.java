@@ -1,4 +1,14 @@
-package loki;
+package loki.facade;
+
+import loki.builder.Level;
+import loki.factory.LokiVariant;
+import loki.game.Guard;
+import loki.game.Illusion;
+import loki.game.Player;
+import loki.observer.GameListener;
+import loki.strategy.ChaseStrategy;
+import loki.strategy.GuardStrategy;
+import loki.strategy.PatrolStrategy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

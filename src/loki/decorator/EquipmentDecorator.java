@@ -1,5 +1,6 @@
-package loki;
+package loki.decorator;
 
+import loki.factory.LokiVariant;
 import java.util.Objects;
 
 public abstract class EquipmentDecorator implements LokiVariant {

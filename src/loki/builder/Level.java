@@ -1,5 +1,4 @@
-package loki;
-
+package loki.builder;
 import java.util.ArrayDeque;
 import java.util.List;
 

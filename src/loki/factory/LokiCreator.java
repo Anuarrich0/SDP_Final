@@ -1,5 +1,4 @@
-package loki;
-
+package loki.factory;
 // Factory Method: каждый Creator переопределяет создание своего варианта.
 public abstract class LokiCreator {
     protected abstract LokiVariant createLoki();

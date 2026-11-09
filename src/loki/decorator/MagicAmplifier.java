@@ -1,5 +1,6 @@
-package loki;
+package loki.decorator;
 
+import loki.factory.LokiVariant;
 public class MagicAmplifier extends EquipmentDecorator {
     public MagicAmplifier(LokiVariant wrapped) { super(wrapped); }
 

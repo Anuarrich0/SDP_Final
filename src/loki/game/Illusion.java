@@ -1,5 +1,4 @@
-package loki;
-
+package loki.game;
 public final class Illusion {
     private final float x, y;
     private float timeLeft;
