@@ -7,9 +7,9 @@ public final class GameLauncher {
     private GameLauncher() { }
     public static void main(String[] args) {
         var config=new Lwjgl3ApplicationConfiguration();
-        config.setTitle("Loki TVA Escape - learning prototype");
-        config.setWindowedMode(1100,752);
-        config.setWindowSizeLimits(720,492,-1,-1);
+        config.setTitle("Loki TVA Escape");
+        config.setWindowedMode(1100,660);
+        config.setWindowSizeLimits(720,432,-1,-1);
         config.useVsync(true); config.setForegroundFPS(60);
         config.disableAudio(true);
         new Lwjgl3Application(new LokiGame(),config);

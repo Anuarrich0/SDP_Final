@@ -18,13 +18,14 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import java.util.List;
 
 /** Input and drawing; game rules stay in GameSession. */
 public final class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera=new OrthographicCamera();
-    private final FitViewport viewport=new FitViewport(960,656,camera);
+    private final FitViewport viewport=new FitViewport(960,576,camera);
     private final ShapeRenderer shapes=new ShapeRenderer();
     private final SpriteBatch batch=new SpriteBatch();
     private final BitmapFont font=new BitmapFont();
@@ -130,13 +131,9 @@ public final class GameScreen extends ScreenAdapter {
             if (guard.y() < session.player().y()) drawGuard(guard, guardAnimations.get(i));
         }
         font.setColor(Color.WHITE);
-        font.draw(batch,"LOKI / TVA ESCAPE     HP "+hud.health()+"     CHARGES "+hud.charges()+" / "+hud.required(),20,634);
-        font.draw(batch,"WASD: move   SPACE: dash (" + (int) Math.ceil(session.getDashCooldown())
-                + "s)   E: illusion (" + (int) Math.ceil(session.getIllusionCooldown())
-                + "s)   R: restart   ESC: pause",20,608);
         if(paused || hud.state()!=GameSession.State.PLAYING) {
             String message=paused?"PAUSED - ESC to resume":hud.state()==GameSession.State.WON?"ESCAPED!  R to restart":"CAUGHT!  R to retry";
-            font.draw(batch,message,340,585);
+            font.draw(batch,message,0,298,viewport.getWorldWidth(),Align.center,false);
         }
         batch.end();
     }
