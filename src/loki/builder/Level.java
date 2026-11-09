@@ -10,16 +10,16 @@ public final class Level {
         public float worldY() { return (y + .5f) * TILE; }
     }
     private final List<String> rows;
-    private final Cell spawn, exit;
+    private final Cell spawn, exit, terminal;
     private final List<Cell> charges, guards;
 
     private Level(List<String> rows) {
         this.rows = List.copyOf(rows);
-        var starts = find('S'); var exits = find('P');
+        var starts = find('S'); var exits = find('P'); var terminals = find('T');
         charges = find('C'); guards = find('G');
-        if (starts.size() != 1 || exits.size() != 1 || charges.isEmpty())
-            throw new IllegalArgumentException("Need one spawn, one portal and at least one charge");
-        spawn = starts.get(0); exit = exits.get(0);
+        if (starts.size() != 1 || exits.size() != 1 || terminals.size() != 1 || charges.isEmpty())
+            throw new IllegalArgumentException("Need one spawn, one portal, one terminal and at least one charge");
+        spawn = starts.get(0); exit = exits.get(0); terminal = terminals.get(0);
         boolean[][] seen = new boolean[height()][width()];
         var queue = new ArrayDeque<Cell>(); queue.add(spawn); seen[spawn.y()][spawn.x()] = true;
         while (!queue.isEmpty()) {
@@ -31,7 +31,8 @@ public final class Level {
                 }
             }
         }
-        if (!seen[exit.y()][exit.x()] || charges.stream().anyMatch(c -> !seen[c.y()][c.x()])
+        if (!seen[exit.y()][exit.x()] || !seen[terminal.y()][terminal.x()]
+                || charges.stream().anyMatch(c -> !seen[c.y()][c.x()])
                 || guards.stream().anyMatch(c -> !seen[c.y()][c.x()]))
             throw new IllegalArgumentException("Unreachable map objective");
     }
@@ -45,6 +46,7 @@ public final class Level {
     public int height() { return rows.size(); }
     public Cell spawn() { return spawn; }
     public Cell exit() { return exit; }
+    public Cell terminal() { return terminal; }
     public List<Cell> charges() { return charges; }
     public List<Cell> guards() { return guards; }
     public boolean wall(int x, int y) {
@@ -122,7 +124,7 @@ public final class Level {
         public Builder rows(String... rows) { this.rows=List.of(rows); return this; }
         public Level build() {
             if(rows.size()<3 || rows.get(0).length()<3 || rows.stream().anyMatch(r ->
-                    r.length()!=rows.get(0).length() || !r.matches("[#.SPCG]+")))
+                    r.length()!=rows.get(0).length() || !r.matches("[#.SPGCT]+")))
                 throw new IllegalArgumentException("Invalid map rows");
             return new Level(rows);
         }
@@ -132,14 +134,14 @@ public final class Level {
             "####################",
             "#S.................#",
             "#....###....###..C.#",
-            "#....#........#....#",
+            "#....#........#.G..#",
             "#....#..G.....#....#",
-            "#.............#....#",
+            "#.........T...#....#",
             "#..C....###........#",
-            "#.......#.....###..#",
+            "#..G....#.....###..#",
             "#..###..#..........#",
             "#.......#....C...P.#",
-            "#..................#",
+            "#...........G......#",
             "####################").build();
     }
 }

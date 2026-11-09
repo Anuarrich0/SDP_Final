@@ -1,4 +1,5 @@
 package loki.game;
+
 public final class CharacterAnimation {
     public enum Direction { DOWN, UP, RIGHT, LEFT }
 
@@ -16,6 +17,18 @@ public final class CharacterAnimation {
         update(x - lastX, y - lastY);
         lastX = x;
         lastY = y;
+    }
+
+    /** Set direction explicitly (for grid-based movement). */
+    public void updateDirection(Player.Direction dir) {
+        if (dir == null || dir == Player.Direction.NONE) return;
+        direction = switch (dir) {
+            case UP -> Direction.UP;
+            case DOWN -> Direction.DOWN;
+            case LEFT -> Direction.LEFT;
+            case RIGHT -> Direction.RIGHT;
+            default -> direction;
+        };
     }
 
     public Direction direction() { return direction; }
