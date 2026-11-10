@@ -1,6 +1,8 @@
 package loki.builder;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /** Builder constructs and validates a grid; coordinates use LibGDX's bottom-left origin. */
@@ -75,7 +77,7 @@ public final class Level {
     }
 
     private List<Cell> find(char symbol) {
-        java.util.ArrayList<Cell> result = new java.util.ArrayList<>();
+        ArrayList<Cell> result = new ArrayList<>();
         for (int y = 0; y < height(); y++) {
             for (int x = 0; x < width(); x++) {
                 if (rows.get(height() - 1 - y).charAt(x) == symbol) {
@@ -181,12 +183,12 @@ public final class Level {
         while (!queue.isEmpty()) {
             Cell current = queue.remove();
             if (current.equals(target)) {
-                java.util.ArrayList<Cell> result = new java.util.ArrayList<>();
+                ArrayList<Cell> result = new ArrayList<>();
                 while (!current.equals(start)) {
                     result.add(current);
                     current = previous[current.y()][current.x()];
                 }
-                java.util.Collections.reverse(result);
+                Collections.reverse(result);
                 return List.copyOf(result);
             }
             for (Cell next : neighbors(current)) {
@@ -208,9 +210,14 @@ public final class Level {
         }
 
         public Level build() {
-            if (rows.size() < 3 || rows.get(0).length() < 3 || rows.stream()
-                    .anyMatch(r -> r.length() != rows.get(0).length() || !r.matches("[#.SPGCTODH_]+"))) {
-                throw new IllegalArgumentException("Invalid map rows");
+            if (rows.size() < 3 || rows.get(0).length() < 3) {
+                throw new IllegalArgumentException("Map is too small");
+            }
+            int width = rows.get(0).length();
+            for (String row : rows) {
+                if (row.length() != width || !row.matches("[#.SPGCTODH_]+")) {
+                    throw new IllegalArgumentException("Invalid map row");
+                }
             }
             return new Level(rows);
         }

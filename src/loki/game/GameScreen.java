@@ -1,30 +1,30 @@
 package loki.game;
 
-import loki.builder.Level;
-import loki.facade.GameSession;
-import loki.factory.LokiVariant;
-import loki.observer.GameListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import loki.decorator.MagicAmplifier;
-import loki.decorator.TimeShield;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import java.util.EnumMap;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import loki.builder.Level;
+import loki.decorator.MagicAmplifier;
+import loki.decorator.TimeShield;
+import loki.facade.GameSession;
+import loki.factory.LokiVariant;
+import loki.observer.GameListener;
 
 public final class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera = new OrthographicCamera();

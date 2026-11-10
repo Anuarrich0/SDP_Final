@@ -2,6 +2,7 @@ package loki.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
+import java.util.Objects;
 
 public final class LokiGame extends Game {
     private PlayerSkin selectedSkin = PlayerSkin.CLASSIC;
@@ -11,7 +12,7 @@ public final class LokiGame extends Game {
     }
 
     public void selectSkin(PlayerSkin skin) {
-        selectedSkin = java.util.Objects.requireNonNull(skin);
+        selectedSkin = Objects.requireNonNull(skin);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package loki.game;
 
-import loki.builder.Level;
 import java.util.ArrayList;
 import java.util.Random;
+import loki.builder.Level;
 
 public final class Illusion {
     private final Player body;

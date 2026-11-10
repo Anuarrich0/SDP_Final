@@ -8,56 +8,28 @@ public abstract class LokiCreator {
     public static class OrdinaryCreator extends LokiCreator {
         @Override
         public LokiVariant createVariant() {
-            return new OrdinaryLoki();
+            return new Loki("Ordinary Loki", BASE_MAGIC_POWER, BASE_AGILITY);
         }
-
     }
 
     public static class ClassicCreator extends LokiCreator {
         @Override
         public LokiVariant createVariant() {
-            return new ClassicLoki();
+            return new Loki("Classic Loki", BASE_MAGIC_POWER, BASE_AGILITY);
         }
-
     }
 
     public static class AlligatorCreator extends LokiCreator {
         @Override
         public LokiVariant createVariant() {
-            return new AlligatorLoki();
+            return new Loki("Alligator Loki", BASE_MAGIC_POWER, BASE_AGILITY);
         }
-
     }
 
     public static class SylvieCreator extends LokiCreator {
         @Override
         public LokiVariant createVariant() {
-            return new Sylvie();
-        }
-
-    }
-
-    private static class OrdinaryLoki extends Loki {
-        OrdinaryLoki() {
-            super("Ordinary Loki", BASE_MAGIC_POWER, BASE_AGILITY);
-        }
-    }
-
-    private static class ClassicLoki extends Loki {
-        ClassicLoki() {
-            super("Classic Loki", BASE_MAGIC_POWER, BASE_AGILITY);
-        }
-    }
-
-    private static class AlligatorLoki extends Loki {
-        AlligatorLoki() {
-            super("Alligator Loki", BASE_MAGIC_POWER, BASE_AGILITY);
-        }
-    }
-
-    private static class Sylvie extends Loki {
-        Sylvie() {
-            super("Sylvie", BASE_MAGIC_POWER, BASE_AGILITY);
+            return new Loki("Sylvie", BASE_MAGIC_POWER, BASE_AGILITY);
         }
     }
 }

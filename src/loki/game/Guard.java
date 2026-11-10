@@ -1,16 +1,18 @@
 package loki.game;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import loki.builder.Level;
 import loki.factory.Loki;
 import loki.strategy.GuardStrategy;
 import loki.strategy.HuntContext;
 import loki.strategy.ScatterStrategy;
-import java.util.Objects;
-import java.util.Random;
 
-/** A TVA hunter: it picks a direction at cell centres and follows its current strategy. */
 public final class Guard {
-    /** Ties between equal-squared-distance passages break in this order, in a fixed order. */
+
+    // Equal distances use this turn priority.
     private static final Player.Direction[] TURN_ORDER = { Player.Direction.UP, Player.Direction.LEFT,
             Player.Direction.DOWN, Player.Direction.RIGHT };
 
@@ -38,7 +40,6 @@ public final class Guard {
         scatterCorner = corner(level, type);
     }
 
-    /** Every hunter owns one corner to run to while the mode is SCATTER. */
     private static Level.Cell corner(Level level, GuardType type) {
         return switch (type) {
         case B15 -> new Level.Cell(level.width() + 1, level.height() + 1);
@@ -72,12 +73,10 @@ public final class Guard {
         return body.currentDirection();
     }
 
-    /** GameSession swaps this when the global CHASE/SCATTER mode changes. */
     public void setStrategy(GuardStrategy strategy) {
         this.strategy = Objects.requireNonNull(strategy);
     }
 
-    /** A mode change may send the hunter back the way it came, even mid-corridor. */
     public void allowReverse() {
         if (state == State.ACTIVE) {
             forceTurn = !body.isMoving();
@@ -175,7 +174,7 @@ public final class Guard {
             forceTurn = false;
         } else if (state == State.RETURNING || state == State.LEAVING) {
             Level.Cell goal = state == State.RETURNING ? home : level.houseExit();
-            java.util.List<Level.Cell> path = level.findPath(currentCell(), goal, true);
+            List<Level.Cell> path = level.findPath(currentCell(), goal, true);
             if (path.isEmpty()) {
                 return false;
             }
@@ -188,7 +187,7 @@ public final class Guard {
             body.queueDirection(currentDirection());
             forceTurn = false;
         } else if (frightened) {
-            java.util.ArrayList<Player.Direction> choices = new java.util.ArrayList<>();
+            ArrayList<Player.Direction> choices = new ArrayList<>();
             for (Player.Direction direction : TURN_ORDER) {
                 if (direction != Player.opposite(currentDirection()) && body.canMove(level, currentCell(), direction)) {
                     choices.add(direction);
@@ -218,7 +217,6 @@ public final class Guard {
         return 160;
     }
 
-    /** Pac-Man style: choose only at a cell centre, by the squared distance from the neighbour to the target. */
     public void steerTo(Level level, Level.Cell target) {
         if (body.isMoving()) {
             return;

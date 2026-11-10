@@ -1,8 +1,8 @@
 package loki;
 
-import loki.game.LokiGame;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import loki.game.LokiGame;
 
 public final class GameLauncher {
     private GameLauncher() {

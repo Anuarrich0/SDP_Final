@@ -1,5 +1,8 @@
 package loki.facade;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import loki.builder.Level;
 import loki.factory.LokiVariant;
 import loki.game.Guard;
@@ -11,9 +14,6 @@ import loki.strategy.ChaseStrategy;
 import loki.strategy.GuardStrategy;
 import loki.strategy.HuntContext;
 import loki.strategy.ScatterStrategy;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 public final class GameSession {
     public enum State {
@@ -140,6 +140,13 @@ public final class GameSession {
         listeners.remove(listener);
     }
 
+    private void notifyListeners() {
+        Snapshot current = snapshot();
+        for (GameListener listener : List.copyOf(listeners)) {
+            listener.onChanged(current);
+        }
+    }
+
     public Illusion getIllusion() {
         return illusion;
     }
@@ -181,9 +188,7 @@ public final class GameSession {
             return false;
         }
         terminalActive = true;
-        for (GameListener listener : List.copyOf(listeners)) {
-            listener.onChanged(snapshot());
-        }
+        notifyListeners();
         return true;
     }
 
@@ -221,9 +226,7 @@ public final class GameSession {
             state = State.WON;
         }
         if (!before.equals(snapshot())) {
-            for (GameListener listener : List.copyOf(listeners)) {
-                listener.onChanged(snapshot());
-            }
+            notifyListeners();
         }
     }
 
@@ -315,8 +318,10 @@ public final class GameSession {
 
     private void updateHouse(float deltaTime) {
         releaseTimer += deltaTime;
-        if (guards.stream().anyMatch(g -> g.state() == Guard.State.LEAVING)) {
-            return;
+        for (Guard guard : guards) {
+            if (guard.state() == Guard.State.LEAVING) {
+                return;
+            }
         }
         for (Guard guard : guards) {
             if (guard.state() != Guard.State.WAITING) {

@@ -1,8 +1,8 @@
 package loki.game;
 
+import java.util.Objects;
 import loki.builder.Level;
 import loki.factory.LokiVariant;
-import java.util.Objects;
 
 public final class Player {
     public static final float RADIUS = 13;
