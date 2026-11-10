@@ -25,8 +25,8 @@ https://www.canva.com/design/DAHaVhqU250/prtAP13o427Q_y8PBYn5og/edit
 
 `CharacterAnimation` выбирает направление и шаг по реальному перемещению Локи и охранников.
 При остановке показывает стойку и сохраняет направление; на паузе кадр замирает.
-Иллюзия использует тот же рисунок с голубым оттенком и запоминает направление
-в момент создания. Все текстуры загружаются один раз, без сглаживания.
+Иллюзия использует тот же рисунок с голубым оттенком и собственную анимацию
+по текущему направлению движения. Все текстуры загружаются один раз, без сглаживания.
 
 В детализированной версии добавлены окантовка и складки одежды Локи, блики
 на шлемах, панели брони охранника, швы пола, решётки, вентиляция и консоль.
@@ -66,3 +66,39 @@ PNG экспортированы из редактируемых рисунко�
 на основе установленного Segoe UI. `ui/title.fnt` и `ui/title.png` — крупные буквы
 названия на основе Segoe UI Light. Шрифты уже подготовлены, дополнительных
 библиотек для их загрузки не требуется.
+
+
+## Варианты Локи
+
+Новые листы созданы встроенным imagegen по образцу `loki.png`.
+Это сгенерированные изображения, а не ручные рисунки Canva. После генерации
+кадры только уменьшены, выровнены и упакованы в атласы; фон прозрачный.
+
+- `loki-ordinary.png` — обычный Локи в рубашке, галстуке и брюках TVA, без шлема.
+- `sylvie.png` — Сильви со светлыми волосами, асимметричными рогами и зелёным костюмом.
+- `loki-alligator.png` — зелёный аллигатор с маленькой золотой короной.
+- `loki.png` — существующий классический Локи, не изменён.
+
+Каждый новый лист: 192×288 RGBA, девять разных кадров 64×96.
+Ряды сверху: вниз, вверх, вправо. Столбцы: стойка, шаг A, шаг B.
+Влево можно отражать правый профиль существующим кодом анимации.
+В игру пока подключён только классический вариант; новые файлы подготовлены
+для последующего выбора персонажа.
+
+Промпты генерации (общий образец — существующий атлас классического Локи):
+
+1. Ordinary Loki: new crisp pixel-art sprite sheet; dark-haired fictional male trickster,
+   no actor likeness, no horns or helmet, white rolled-sleeve TVA office shirt,
+   loose dark-green tie, brown trousers, dark boots, small green magic accent.
+2. Sylvie: new crisp pixel-art sprite sheet; original fictional blonde female Norse
+   trickster, no real actor likeness, shoulder-length blonde hair, asymmetric golden
+   headpiece with one broken horn, fitted dark-green/black adventure outfit,
+   gold belt, dark boots.
+3. Alligator Loki: new crisp pixel-art sprite sheet; small green quadruped alligator,
+   tiny golden horned crown, clear snout, short legs, tapered tail, scales and yellow eyes.
+
+Общие требования каждого промпта: match reference pixel density, outline, shading,
+proportions and top-down RPG perspective; transparent background; exact 3×3 grid;
+64:96 cell aspect, 192:288 sheet aspect; rows DOWN/UP/RIGHT; columns standing,
+left-leg step, right-leg step (opposite diagonal leg pairs for alligator);
+consistent identity, full body/tail visible; no labels, grid, text, shadows or cropping.
