@@ -21,7 +21,6 @@ public final class CharacterAnimation {
         lastY = y;
     }
 
-    /** Set direction explicitly (for grid-based movement). */
     public void updateDirection(Player.Direction dir) {
         if (dir == null || dir == Player.Direction.NONE) {
             return;
@@ -43,7 +42,7 @@ public final class CharacterAnimation {
         return frame;
     }
 
-    public void update(float dx, float dy) {
+    private void update(float dx, float dy) {
         float moved = (float) Math.hypot(dx, dy);
         if (moved < .001f) {
             distance = 0;

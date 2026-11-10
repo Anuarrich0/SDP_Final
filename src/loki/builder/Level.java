@@ -50,7 +50,7 @@ public final class Level {
         exit = exits.get(0);
         terminal = terminals.get(0);
         boolean[][] reachable = new boolean[height()][width()];
-        ArrayDeque<Cell> queue = new ArrayDeque<Cell>();
+        ArrayDeque<Cell> queue = new ArrayDeque<>();
         queue.add(spawn);
         reachable[spawn.y()][spawn.x()] = true;
         while (!queue.isEmpty()) {
@@ -75,7 +75,7 @@ public final class Level {
     }
 
     private List<Cell> find(char symbol) {
-        java.util.ArrayList<Cell> result = new java.util.ArrayList<Cell>();
+        java.util.ArrayList<Cell> result = new java.util.ArrayList<>();
         for (int y = 0; y < height(); y++) {
             for (int x = 0; x < width(); x++) {
                 if (rows.get(height() - 1 - y).charAt(x) == symbol) {
@@ -158,7 +158,7 @@ public final class Level {
         return new Cell(x, y);
     }
 
-    public List<Cell> neighbors(Cell cell) {
+    private List<Cell> neighbors(Cell cell) {
         return List.of(neighbor(cell, 1, 0), neighbor(cell, -1, 0), neighbor(cell, 0, 1), neighbor(cell, 0, -1));
     }
 
@@ -176,10 +176,6 @@ public final class Level {
 
     public boolean wall(int x, int y) {
         return x < 0 || y < 0 || x >= width() || y >= height() || rows.get(height() - 1 - y).charAt(x) == '#';
-    }
-
-    public List<Cell> findPath(Cell start, Cell target) {
-        return findPath(start, target, false);
     }
 
     public List<Cell> findPath(Cell start, Cell target, boolean houseAccess) {

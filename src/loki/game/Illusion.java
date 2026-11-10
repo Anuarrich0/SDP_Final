@@ -43,7 +43,7 @@ public final class Illusion {
         timeLeft = Math.max(0, timeLeft - deltaTime);
         while (remainingTime > .000001f) {
             if (!body.isMoving()) {
-                ArrayList<Player.Direction> choices = new ArrayList<Player.Direction>();
+                ArrayList<Player.Direction> choices = new ArrayList<>();
                 for (Player.Direction direction : Player.Direction.values()) {
                     if (direction == Player.Direction.NONE || !body.canMove(level, body.currentCell(), direction)) {
                         continue;

@@ -47,7 +47,6 @@ public final class Player {
         return y;
     }
 
-
     public void setSpeed(float speed) {
         if (!Float.isFinite(speed) || speed <= 0) {
             throw new IllegalArgumentException("Invalid speed");

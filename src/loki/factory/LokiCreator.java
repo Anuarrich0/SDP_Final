@@ -1,18 +1,13 @@
 package loki.factory;
 
-// Factory Method: each creator overrides the creation of its variant.
 public abstract class LokiCreator {
     private static final int BASE_MAGIC_POWER = 75;
     private static final int BASE_AGILITY = 30;
-    protected abstract LokiVariant createLoki();
-
-    public final LokiVariant createVariant() {
-        return createLoki();
-    }
+    public abstract LokiVariant createVariant();
 
     public static class OrdinaryCreator extends LokiCreator {
         @Override
-        protected LokiVariant createLoki() {
+        public LokiVariant createVariant() {
             return new OrdinaryLoki();
         }
 
@@ -20,7 +15,7 @@ public abstract class LokiCreator {
 
     public static class ClassicCreator extends LokiCreator {
         @Override
-        protected LokiVariant createLoki() {
+        public LokiVariant createVariant() {
             return new ClassicLoki();
         }
 
@@ -28,7 +23,7 @@ public abstract class LokiCreator {
 
     public static class AlligatorCreator extends LokiCreator {
         @Override
-        protected LokiVariant createLoki() {
+        public LokiVariant createVariant() {
             return new AlligatorLoki();
         }
 
@@ -36,7 +31,7 @@ public abstract class LokiCreator {
 
     public static class SylvieCreator extends LokiCreator {
         @Override
-        protected LokiVariant createLoki() {
+        public LokiVariant createVariant() {
             return new Sylvie();
         }
 

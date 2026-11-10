@@ -15,13 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/** Facade: one entry point for game rules, without graphics or keyboard dependencies. */
 public final class GameSession {
     public enum State {
         PLAYING, WON, LOST
     }
 
-    /** The first-level scatter/chase schedule. The last chase has no time limit. */
     public enum Mode {
         SCATTER, CHASE
     }
@@ -67,7 +65,6 @@ public final class GameSession {
         dots = new ArrayList<>(level.dots());
     }
 
-    /** Assign one hunter type to each G in map reading order. */
     private static List<Guard> createGuards(Level level) {
         GuardType[] types = GuardType.values();
         if (level.guards().size() != 3) {
@@ -100,7 +97,6 @@ public final class GameSession {
     public float timeStop() {
         return timeStop;
     }
-
 
     public boolean stopTime() {
         if (state != State.PLAYING || magicBlocked() || timeStopCooldown > 0) {
@@ -148,8 +144,6 @@ public final class GameSession {
         listeners.remove(listener);
     }
 
-
-
     public Illusion getIllusion() {
         return illusion;
     }
@@ -167,7 +161,6 @@ public final class GameSession {
         return true;
     }
 
-    // SPACE starts a short dash in the current movement direction.
     public boolean dash() {
         if (state != State.PLAYING || magicBlocked() || dashCooldown > 0) {
             return false;
@@ -179,12 +172,10 @@ public final class GameSession {
         return started;
     }
 
-    /** Collect every dot, power sphere and TemPad, then use the terminal to leave. */
     public boolean isExitOpen() {
         return charges.isEmpty() && terminalActive && dots.isEmpty() && powers.isEmpty();
     }
 
-    /** F: switch on the terminal, but only while standing next to it and holding all the TemPads. */
     public boolean activateTerminal() {
         if (state != State.PLAYING || terminalActive || !charges.isEmpty()) {
             return false;
@@ -359,7 +350,6 @@ public final class GameSession {
         return mode;
     }
 
-    /** Flips SCATTER <-> CHASE on a timer. It only runs while playing, so pause freezes it and R resets it. */
     private void updateMode(float deltaTime) {
         modeTimer -= deltaTime;
         if (modeTimer > 0) {
@@ -371,11 +361,10 @@ public final class GameSession {
         GuardStrategy next = mode == Mode.SCATTER ? scatter : chase;
         for (Guard guard : guards) {
             guard.setStrategy(next);
-            guard.allowReverse(); // reverse when the mode changes
+            guard.allowReverse();
         }
     }
 
-    /** CHASE always knows where Loki is; a live illusion is an explicit decoy and takes priority. */
     private HuntContext huntContext() {
         Player.Direction facing = player.currentDirection() != Player.Direction.NONE ? player.currentDirection()
                 : lastInputDir;

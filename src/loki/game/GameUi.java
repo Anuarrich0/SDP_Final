@@ -15,11 +15,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Disposable;
 
-/** Shared colours, font and buttons for the menu and game. */
 public final class GameUi implements Disposable {
-    public static final Color GREEN = Color.valueOf("8FE6B2"), GOLD = Color.valueOf("E8B777");
+    public static final Color GOLD = Color.valueOf("E8B777");
     public static final Color MUTED = Color.valueOf("9FB5AF");
-    public final Skin skin = new Skin();
+    private final Skin skin = new Skin();
 
     public GameUi() {
         BitmapFont font = new BitmapFont(Gdx.files.internal("ui/interface.fnt"));

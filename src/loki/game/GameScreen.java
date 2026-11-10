@@ -26,7 +26,6 @@ import java.util.EnumMap;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Input and drawing; game rules stay in GameSession. */
 public final class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final FitViewport viewport = new FitViewport(25 * Level.TILE, 19 * Level.TILE, camera);
@@ -58,13 +57,9 @@ public final class GameScreen extends ScreenAdapter {
     private boolean paused;
     private float elapsed;
 
-    public GameScreen() {
-        this(null);
-    }
-
     public GameScreen(LokiGame game) {
         this.game = game;
-        skin = game == null ? PlayerSkin.CLASSIC : game.selectedSkin();
+        skin = game.selectedSkin();
         lokiTexture = new Texture(Gdx.files.internal(skin.textureFile()));
         lokiSprites = createSprites(lokiTexture);
         for (GuardType type : GuardType.values()) {
@@ -121,7 +116,7 @@ public final class GameScreen extends ScreenAdapter {
         if (snapshot.state() == GameSession.State.PLAYING && Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             paused = !paused;
         }
-        if (!paused && deltaTime > 0 && session.snapshot().state() == GameSession.State.PLAYING) {
+        if (canPlay() && deltaTime > 0) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
                 session.dash();
             }
@@ -285,9 +280,7 @@ public final class GameScreen extends ScreenAdapter {
         });
         card.add(overlayButton).width(340).height(54).padBottom(12).row();
         card.add(ui.button("Main Menu", false, () -> {
-            if (game != null) {
-                Gdx.app.postRunnable(game::showMenu);
-            }
+            Gdx.app.postRunnable(game::showMenu);
         })).width(340).height(46);
         overlay.add(card);
         overlay.setVisible(false);

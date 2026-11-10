@@ -188,7 +188,7 @@ public final class Guard {
             body.queueDirection(currentDirection());
             forceTurn = false;
         } else if (frightened) {
-            java.util.ArrayList<Player.Direction> choices = new java.util.ArrayList<Player.Direction>();
+            java.util.ArrayList<Player.Direction> choices = new java.util.ArrayList<>();
             for (Player.Direction direction : TURN_ORDER) {
                 if (direction != Player.opposite(currentDirection()) && body.canMove(level, currentCell(), direction)) {
                     choices.add(direction);
