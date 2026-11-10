@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -30,7 +31,8 @@ import loki.observer.GameListener;
 
 public final class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera = new OrthographicCamera();
-    private final FitViewport viewport = new FitViewport(25 * Level.TILE, 19 * Level.TILE, camera);
+    // The world is one green strip taller than the level on both sides, so the HUD never covers the maze.
+    private final FitViewport viewport = new FitViewport(25 * Level.TILE, 19 * Level.TILE + 2 * STRIP, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
     private final SpriteBatch batch = new SpriteBatch();
     private final BitmapFont font = new BitmapFont(Gdx.files.internal("ui/interface.fnt"));
@@ -45,6 +47,30 @@ public final class GameScreen extends ScreenAdapter {
     private final TextureRegion[] tiles = TextureRegion.split(interiorTexture, 48, 48)[0];
     private final Texture temPadTexture = new Texture(Gdx.files.internal("world/tempad.png"));
     private final TextureRegion temPadSprite = new TextureRegion(temPadTexture);
+    private final BitmapFont hudFont = new BitmapFont(Gdx.files.internal("ui/interface.fnt"));
+    private final Texture heartFullTexture = new Texture(Gdx.files.internal("ui/icons/heart-full.png"));
+    private final Texture heartHalfTexture = new Texture(Gdx.files.internal("ui/icons/heart-half.png"));
+    private final Texture heartEmptyTexture = new Texture(Gdx.files.internal("ui/icons/heart-empty.png"));
+    private final Texture dashIconTexture = new Texture(Gdx.files.internal("ui/icons/ability-1.png"));
+    private final Texture illusionIconTexture = new Texture(Gdx.files.internal("ui/icons/ability-2.png"));
+    private final Texture timeStopIconTexture = new Texture(Gdx.files.internal("ui/icons/ability-3.png"));
+    private final Texture timerTexture = new Texture(Gdx.files.internal("ui/miss-minutes-timer-empty.png"));
+    private final TextureRegion heartFull = new TextureRegion(heartFullTexture);
+    private final TextureRegion heartHalf = new TextureRegion(heartHalfTexture);
+    private final TextureRegion heartEmpty = new TextureRegion(heartEmptyTexture);
+    private final TextureRegion timerSprite = new TextureRegion(timerTexture);
+    private final GlyphLayout centeredLayout = new GlyphLayout();
+    private static final Color DIMMED = new Color(1, 1, 1, .35f);
+    private static final Color STRIP_GREEN = new Color(.06f, .26f, .16f, 1);
+    private static final int HEARTS = 5;
+    /** Height of the green status strips, and the square size of every HUD icon. */
+    private static final float STRIP = 76, ICON = 44, PAD = 12;
+    /** Ability labels sit in the strip below their icon: icon gap, text box height, bottom padding. */
+    private static final float ICON_GAP = 4, LABEL_HEIGHT = 16, TEXT_PAD = 6;
+    /** Centre of the clock reading inside the timer sprite, as a fraction of the sprite size. */
+    private static final float TIMER_TEXT_X = .62f, TIMER_TEXT_Y = .39f;
+    private static final String[] ABILITY_KEYS = { "SPACE", "E", "Q" };
+    private float playTime;
     private final Music music = Gdx.audio.newMusic(Gdx.files.internal("sounds/timeline-music.wav"));
     private final Sound pickupSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pickup.wav"));
     private final Sound dashSound = Gdx.audio.newSound(Gdx.files.internal("sounds/dash.wav"));
@@ -85,6 +111,11 @@ public final class GameScreen extends ScreenAdapter {
         lokiTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         interiorTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         temPadTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        hudFont.getData().setScale(.4f);
+        hudFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        for (Texture texture : hudTextures()) {
+            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        }
         buildInterface();
         restart();
     }
@@ -106,6 +137,7 @@ public final class GameScreen extends ScreenAdapter {
         session.addListener(stateListener);
         paused = false;
         elapsed = 0;
+        playTime = 0;
         overlay.setVisible(false);
     }
 
@@ -120,12 +152,15 @@ public final class GameScreen extends ScreenAdapter {
             music.pause();
         }
         ScreenUtils.clear(.035f, .055f, .065f, 1);
+        Level level = session.level();
         viewport.apply();
+        // Centre on the maze so the strips above and below it stay outside the playfield.
+        camera.position.set(level.width() * Level.TILE / 2f, level.height() * Level.TILE / 2f, 0);
         camera.update();
         shapes.setProjectionMatrix(camera.combined);
-        Level level = session.level();
         drawLevel(level);
         drawCharacters(level);
+        drawHud(level);
         updateOverlay();
         stage.getViewport().apply();
         stage.act(Math.min(deltaTime, .1f));
@@ -167,6 +202,7 @@ public final class GameScreen extends ScreenAdapter {
             while (elapsed >= 1f / 120) {
                 session.update(1f / 120, inputDirection);
                 elapsed -= 1f / 120;
+                playTime += 1f / 120;
             }
             int itemsAfter = session.dots().size() + session.powers().size() + session.charges().size();
             if (itemsAfter < itemsBefore) {
@@ -287,6 +323,80 @@ public final class GameScreen extends ScreenAdapter {
         }
         font.setColor(Color.WHITE);
         batch.end();
+    }
+
+    /** Green status strips: lives, orbs and the timer above the maze, ability slots below it. */
+    private void drawHud(Level level) {
+        float width = level.width() * Level.TILE, height = level.height() * Level.TILE;
+        shapes.setProjectionMatrix(camera.combined);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        shapes.setColor(STRIP_GREEN);
+        shapes.rect(0, -STRIP, width, STRIP);
+        shapes.rect(0, height, width, STRIP);
+        shapes.end();
+
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        batch.setColor(Color.WHITE);
+        float topY = height + (STRIP - ICON) / 2;
+        int health = snapshot.health();
+        float perHeart = 100f / HEARTS;
+        for (int i = 0; i < HEARTS; i++) {
+            float rest = health - i * perHeart;
+            TextureRegion heart = rest <= 0 ? heartEmpty : rest < perHeart ? heartHalf : heartFull;
+            batch.draw(heart, PAD + i * (ICON + 4), topY, ICON, ICON);
+        }
+        int total = level.dots().size() + level.powers().size() + level.charges().size();
+        int orbsLeft = session.dots().size() + session.powers().size() + session.charges().size();
+        float orbsX = PAD + HEARTS * (ICON + 4) + 16;
+        batch.draw(temPadSprite, orbsX, topY, ICON, ICON);
+        hudFont.setColor(Color.WHITE);
+        hudFont.draw(batch, (total - orbsLeft) + "/" + total, orbsX + ICON + 10, topY + ICON / 2 + 6);
+
+        float timerHeight = 56;
+        float timerWidth = timerHeight * timerTexture.getWidth() / timerTexture.getHeight();
+        float timerX = width - PAD - timerWidth, timerY = height + (STRIP - timerHeight) / 2;
+        batch.draw(timerSprite, timerX, timerY, timerWidth, timerHeight);
+        hudFont.setColor(Color.LIME);
+        centeredLayout.setText(hudFont, clock());
+        hudFont.draw(batch, clock(), timerX + timerWidth * TIMER_TEXT_X - centeredLayout.width / 2,
+                timerY + timerHeight * TIMER_TEXT_Y + centeredLayout.height / 2);
+
+        float abilitiesX = width - PAD - (3 * ICON + 2 * 16);
+        float abilityY = -STRIP + TEXT_PAD + LABEL_HEIGHT + ICON_GAP;
+        Texture[] icons = { dashIconTexture, illusionIconTexture, timeStopIconTexture };
+        float[] cooldowns = { session.dashCooldown(), session.illusionCooldown(), session.timeStopCooldown() };
+        for (int i = 0; i < icons.length; i++) {
+            drawAbility(abilitiesX + i * (ICON + 16), abilityY, icons[i], cooldowns[i], ABILITY_KEYS[i]);
+        }
+        hudFont.setColor(Color.WHITE);
+        batch.end();
+    }
+
+    /** One ability slot: dimmed with the seconds left, or bright with its key once ready. */
+    private void drawAbility(float x, float y, Texture icon, float remaining, String label) {
+        boolean ready = remaining <= 0;
+        batch.setColor(ready ? Color.WHITE : DIMMED);
+        batch.draw(icon, x, y, ICON, ICON);
+        batch.setColor(Color.WHITE);
+        hudFont.setColor(ready ? Color.WHITE : Color.SCARLET);
+        drawCentered(ready ? label : Integer.toString((int) Math.ceil(remaining)), x + ICON / 2, y - ICON_GAP);
+    }
+
+    /** Draws text centred on x, with the top of the line on y. */
+    private void drawCentered(String text, float x, float y) {
+        centeredLayout.setText(hudFont, text);
+        hudFont.draw(batch, text, x - centeredLayout.width / 2, y);
+    }
+
+    private String clock() {
+        int seconds = (int) playTime, minutes = seconds / 60, rest = seconds % 60;
+        return minutes + ":" + (rest < 10 ? "0" : "") + rest;
+    }
+
+    private Texture[] hudTextures() {
+        return new Texture[] { heartFullTexture, heartHalfTexture, heartEmptyTexture,
+                dashIconTexture, illusionIconTexture, timeStopIconTexture, timerTexture };
     }
 
     private void buildInterface() {
@@ -437,9 +547,13 @@ public final class GameScreen extends ScreenAdapter {
         shapes.dispose();
         batch.dispose();
         font.dispose();
+        hudFont.dispose();
         stage.dispose();
         ui.dispose();
         for (Texture texture : guardTextures.values()) {
+            texture.dispose();
+        }
+        for (Texture texture : hudTextures()) {
             texture.dispose();
         }
         interiorTexture.dispose();

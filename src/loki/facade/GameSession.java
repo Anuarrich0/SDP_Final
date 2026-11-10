@@ -107,6 +107,19 @@ public final class GameSession {
         return score;
     }
 
+    /** Seconds left before each ability is ready again (0 means ready). */
+    public float dashCooldown() {
+        return dashCooldown;
+    }
+
+    public float illusionCooldown() {
+        return illusionCooldown;
+    }
+
+    public float timeStopCooldown() {
+        return timeStopCooldown;
+    }
+
     public Level level() {
         return level;
     }
