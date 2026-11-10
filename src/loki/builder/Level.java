@@ -10,13 +10,23 @@ public final class Level {
         public float worldY() { return (y + .5f) * TILE; }
     }
     private final List<String> rows;
-    private final Cell spawn, exit, terminal;
-    private final List<Cell> charges, guards;
+    private final Cell spawn, exit, terminal, door;
+    private final int tunnelRow;
+    private final List<Cell> charges, guards, powers, dots;
 
     private Level(List<String> rows) {
         this.rows = List.copyOf(rows);
         var starts = find('S'); var exits = find('P'); var terminals = find('T');
+        var doors = find('D');
+        if (doors.size()!=1) throw new IllegalArgumentException("Need one house door");
+        door = doors.get(0);
+        tunnelRow = height()/2;
+        if (wall(0,tunnelRow) || wall(width()-1,tunnelRow))
+            throw new IllegalArgumentException("Need two tunnel openings");
         charges = find('C'); guards = find('G');
+        if (guards.size()!=3 || guards.stream().anyMatch(c -> !house(c)))
+            throw new IllegalArgumentException("Need three guards inside the house");
+        powers = find('O'); dots = find('.');
         if (starts.size() != 1 || exits.size() != 1 || terminals.size() != 1 || charges.isEmpty())
             throw new IllegalArgumentException("Need one spawn, one portal, one terminal and at least one charge");
         spawn = starts.get(0); exit = exits.get(0); terminal = terminals.get(0);
@@ -24,17 +34,20 @@ public final class Level {
         var queue = new ArrayDeque<Cell>(); queue.add(spawn); seen[spawn.y()][spawn.x()] = true;
         while (!queue.isEmpty()) {
             Cell c = queue.remove();
-            for (Cell n : List.of(new Cell(c.x()+1,c.y()), new Cell(c.x()-1,c.y()),
-                    new Cell(c.x(),c.y()+1), new Cell(c.x(),c.y()-1))) {
-                if (!wall(n.x(),n.y()) && !seen[n.y()][n.x()]) {
+            for (Cell n : neighbors(c)) {
+                if (canEnter(n, false) && !seen[n.y()][n.x()]) {
                     seen[n.y()][n.x()] = true; queue.add(n);
                 }
             }
         }
         if (!seen[exit.y()][exit.x()] || !seen[terminal.y()][terminal.x()]
                 || charges.stream().anyMatch(c -> !seen[c.y()][c.x()])
-                || guards.stream().anyMatch(c -> !seen[c.y()][c.x()]))
+                || powers.stream().anyMatch(c -> !seen[c.y()][c.x()])
+                || dots.stream().anyMatch(c -> !seen[c.y()][c.x()]))
             throw new IllegalArgumentException("Unreachable map objective");
+        if (!seen[houseExit().y()][houseExit().x()] || !canEnter(door,true)
+                || guards.stream().anyMatch(c -> findPath(c,houseExit(),true).isEmpty()))
+            throw new IllegalArgumentException("House has no exit");
     }
     private List<Cell> find(char symbol) {
         var result = new java.util.ArrayList<Cell>();
@@ -49,22 +62,54 @@ public final class Level {
     public Cell terminal() { return terminal; }
     public List<Cell> charges() { return charges; }
     public List<Cell> guards() { return guards; }
+    public List<Cell> powers() { return powers; }
+    public List<Cell> dots() { return dots; }
+    public Cell door() { return door; }
+    public Cell houseExit() { return new Cell(door.x(),door.y()+1); }
+    public boolean house(Cell cell) {
+        return cell.x()>=door.x()-3 && cell.x()<=door.x()+3
+                && cell.y()>=door.y()-2 && cell.y()<door.y();
+    }
+    public boolean suppressed(Cell cell) { return symbol(cell)=='M'; }
+    private char symbol(Cell cell) {
+        return wall(cell.x(),cell.y()) ? '#' : rows.get(height()-1-cell.y()).charAt(cell.x());
+    }
+    public boolean canEnter(Cell cell, boolean houseAccess) {
+        return !wall(cell.x(),cell.y()) && (houseAccess || (!house(cell) && !cell.equals(door)));
+    }
+    public boolean tunnel(Cell cell) { return cell.y()==tunnelRow && (cell.x()<3 || cell.x()>=width()-3); }
+    public Cell neighbor(Cell from, int dx, int dy) {
+        int x=from.x()+dx, y=from.y()+dy;
+        if (y==tunnelRow && dy==0) x=Math.floorMod(x,width());
+        return new Cell(x,y);
+    }
+    public List<Cell> neighbors(Cell cell) {
+        return List.of(neighbor(cell,1,0),neighbor(cell,-1,0),neighbor(cell,0,1),neighbor(cell,0,-1));
+    }
+    public double distance(float x1,float y1,float x2,float y2) {
+        float dx=Math.abs(x1-x2);
+        if ((int)(y1/TILE)==tunnelRow && (int)(y2/TILE)==tunnelRow)
+            dx=Math.min(dx,width()*TILE-dx);
+        return Math.hypot(dx,y1-y2);
+    }
+    public int tunnelRow() { return tunnelRow; }
     public boolean wall(int x, int y) {
         return x<0 || y<0 || x>=width() || y>=height() || rows.get(height()-1-y).charAt(x)=='#';
     }
     public boolean canStand(float x, float y, float radius) {
         int left=(int)Math.floor((x-radius)/TILE), right=(int)Math.floor((x+radius)/TILE);
         int bottom=(int)Math.floor((y-radius)/TILE), top=(int)Math.floor((y+radius)/TILE);
-        for(int cy=bottom;cy<=top;cy++) for(int cx=left;cx<=right;cx++) if(wall(cx,cy)) return false;
+        for(int cy=bottom;cy<=top;cy++) for(int cx=left;cx<=right;cx++)
+            if(wall(cy==tunnelRow ? Math.floorMod(cx,width()) : cx,cy)) return false;
         return true;
     }
-    public List<Cell> findPath(Cell start, Cell target) {
-        if (wall(start.x(), start.y()) || wall(target.x(), target.y())) return List.of();
+    public List<Cell> findPath(Cell start, Cell target) { return findPath(start,target,false); }
+    public List<Cell> findPath(Cell start, Cell target, boolean houseAccess) {
+        if (!canEnter(start,houseAccess) || !canEnter(target,houseAccess)) return List.of();
         Cell[][] previous = new Cell[height()][width()];
         ArrayDeque<Cell> queue = new ArrayDeque<>();
         queue.add(start);
         previous[start.y()][start.x()] = start;
-        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
         // ponytail: BFS is enough for the small map; use A* if maps become much larger.
         while (!queue.isEmpty()) {
             Cell current = queue.remove();
@@ -77,12 +122,10 @@ public final class Level {
                 java.util.Collections.reverse(result);
                 return List.copyOf(result);
             }
-            for (int[] direction : directions) {
-                int x = current.x() + direction[0];
-                int y = current.y() + direction[1];
-                if (!wall(x, y) && previous[y][x] == null) {
-                    previous[y][x] = current;
-                    queue.add(new Cell(x, y));
+            for (Cell next : neighbors(current)) {
+                if (canEnter(next,houseAccess) && previous[next.y()][next.x()]==null) {
+                    previous[next.y()][next.x()]=current;
+                    queue.add(next);
                 }
             }
         }
@@ -124,24 +167,31 @@ public final class Level {
         public Builder rows(String... rows) { this.rows=List.of(rows); return this; }
         public Level build() {
             if(rows.size()<3 || rows.get(0).length()<3 || rows.stream().anyMatch(r ->
-                    r.length()!=rows.get(0).length() || !r.matches("[#.SPGCT]+")))
+                    r.length()!=rows.get(0).length() || !r.matches("[#.SPGCTODHM_]+")))
                 throw new IllegalArgumentException("Invalid map rows");
             return new Level(rows);
         }
     }
     public static Level training() {
         return new Builder().rows(
-            "####################",
-            "#S.................#",
-            "#....###....###..C.#",
-            "#....#........#.G..#",
-            "#....#..G.....#....#",
-            "#.........T...#....#",
-            "#..C....###........#",
-            "#..G....#.....###..#",
-            "#..###..#..........#",
-            "#.......#....C...P.#",
-            "#...........G......#",
-            "####################").build();
+            "#########################",
+            "#C...O.............O...P#",
+            "#.###.###.##.##.###.###.#",
+            "#.###.###.##.##.###.###.#",
+            "#.###.###.##.##.###.###.#",
+            "#....M.............T....#",
+            "#.###.###.##.##.###.###.#",
+            "#..........._...........#",
+            "#.###.#.####D####.#.###.#",
+            "_.......#HHHHHHH#..M...._",
+            "#.###.#.#HGHGHGH#.#.###.#",
+            "#.###.#.#########.#.###.#",
+            "#.###.###.##.##.###.###.#",
+            "#....M......C...........#",
+            "#.###.###.##.##.###.###.#",
+            "#.###.###.##.##.###.###.#",
+            "#.###.###.##.##.###.###.#",
+            "#S...O.............O...C#",
+            "#########################").build();
     }
 }

@@ -6,7 +6,7 @@ import loki.game.Player;
 
 /** CHASE: each hunter type cuts Loki off in its own way. */
 public final class ChaseStrategy implements GuardStrategy {
-    private static final float SPEED = 100;
+    private static final float SPEED = 160;
     private static final int X5_FAR_CELLS = 8;
 
     @Override
@@ -36,7 +36,7 @@ public final class ChaseStrategy implements GuardStrategy {
 
     private static Level.Cell ahead(Level.Cell cell, Player.Direction direction, int cells) {
         return switch (direction) {
-            case UP -> new Level.Cell(cell.x(), cell.y() + cells);
+            case UP -> new Level.Cell(cell.x() - cells, cell.y() + cells);
             case DOWN -> new Level.Cell(cell.x(), cell.y() - cells);
             case LEFT -> new Level.Cell(cell.x() - cells, cell.y());
             case RIGHT -> new Level.Cell(cell.x() + cells, cell.y());

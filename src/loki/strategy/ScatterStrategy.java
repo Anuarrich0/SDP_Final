@@ -5,7 +5,7 @@ import loki.game.Guard;
 
 /** SCATTER: every hunter runs off to its own corner until the mode flips back to CHASE. */
 public final class ScatterStrategy implements GuardStrategy {
-    private static final float SPEED = 70;
+    private static final float SPEED = 160;
 
     @Override
     public void update(Guard guard, Level level, HuntContext context) {

@@ -51,3 +51,18 @@ PNG экспортированы из редактируемых рисунко�
 
 Листы подготовлены для следующих изменений игровой логики.
 Текущий обычный охранник продолжает использовать guard.png.
+
+## Фон меню и интерфейс
+
+`menu-background.png` — отдельный фон стартового меню, создан встроенным imagegen.
+Варианты с Локи генератор отклонил. В итоговом изображении нет персонажей:
+это интерьер временного агентства с оранжевым порталом. Спрайты персонажей не менялись.
+
+Промпт итогового фона:
+
+> Original cinematic environment illustration for a time-travel adventure game main-menu background. Empty monumental retro-futurist time bureaucracy office, no people or characters. Warm amber circular time portal on the right, brass elevators, vintage analog clocks, teak desks, paper case files, green glass computer consoles, Art Deco brutalist architecture, distant delicate luminous branching timeline. Beautiful polished painterly realism, emerald green and warm burnt orange lighting, rich depth and volumetric haze. Wide landscape 16:9. The left 45 percent is dark and quiet negative space reserved for separately rendered game title and menu buttons. No text, no logo, no watermarks, no interface elements. Opaque background.
+
+`ui/interface.fnt` и `ui/interface.png` — растровый шрифт интерфейса с кириллицей
+на основе установленного Segoe UI. `ui/title.fnt` и `ui/title.png` — крупные буквы
+названия на основе Segoe UI Light. Шрифты уже подготовлены, дополнительных
+библиотек для их загрузки не требуется.

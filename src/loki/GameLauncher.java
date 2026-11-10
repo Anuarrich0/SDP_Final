@@ -8,8 +8,8 @@ public final class GameLauncher {
     public static void main(String[] args) {
         var config=new Lwjgl3ApplicationConfiguration();
         config.setTitle("Loki TVA Escape");
-        config.setWindowedMode(1100,660);
-        config.setWindowSizeLimits(720,432,-1,-1);
+        config.setWindowedMode(1000,820);
+        config.setWindowSizeLimits(700,580,-1,-1);
         config.useVsync(true); config.setForegroundFPS(60);
         config.disableAudio(true);
         new Lwjgl3Application(new LokiGame(),config);
