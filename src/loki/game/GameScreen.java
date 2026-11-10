@@ -3,6 +3,7 @@ package loki.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -44,6 +45,7 @@ public final class GameScreen extends ScreenAdapter {
     private final TextureRegion[] tiles = TextureRegion.split(interiorTexture, 48, 48)[0];
     private final Texture temPadTexture = new Texture(Gdx.files.internal("tempad.png"));
     private final TextureRegion temPadSprite = new TextureRegion(temPadTexture);
+    private final Music music = Gdx.audio.newMusic(Gdx.files.internal("sounds/timeline-music.wav"));
     private final Sound pickupSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pickup.wav"));
     private final Sound dashSound = Gdx.audio.newSound(Gdx.files.internal("sounds/dash.wav"));
     private final Sound illusionSound = Gdx.audio.newSound(Gdx.files.internal("sounds/illusion.wav"));
@@ -67,6 +69,8 @@ public final class GameScreen extends ScreenAdapter {
 
     public GameScreen(LokiGame game) {
         this.game = game;
+        music.setLooping(true);
+        music.setVolume(.22f);
         font.getData().setScale(.25f);
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         skin = game.selectedSkin();
@@ -86,6 +90,7 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private void restart() {
+        music.stop();
         if (session != null) {
             session.removeListener(stateListener);
         }
@@ -107,6 +112,13 @@ public final class GameScreen extends ScreenAdapter {
     @Override
     public void render(float deltaTime) {
         updateGame(deltaTime);
+        if (canPlay()) {
+            if (!music.isPlaying()) {
+                music.play();
+            }
+        } else {
+            music.pause();
+        }
         ScreenUtils.clear(.035f, .055f, .065f, 1);
         viewport.apply();
         camera.update();
@@ -409,11 +421,18 @@ public final class GameScreen extends ScreenAdapter {
 
     @Override
     public void pause() {
+        music.pause();
         paused = true;
     }
 
     @Override
+    public void hide() {
+        music.pause();
+    }
+
+    @Override
     public void dispose() {
+        music.dispose();
         session.removeListener(stateListener);
         shapes.dispose();
         batch.dispose();
