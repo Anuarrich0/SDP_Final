@@ -41,9 +41,9 @@ public final class GameScreen extends ScreenAdapter {
     private CharacterAnimation illusionAnimation;
     private final EnumMap<GuardType, Texture> guardTextures = new EnumMap<>(GuardType.class);
     private final EnumMap<GuardType, TextureRegion[][]> guardSprites = new EnumMap<>(GuardType.class);
-    private final Texture interiorTexture = new Texture(Gdx.files.internal("interior.png"));
+    private final Texture interiorTexture = new Texture(Gdx.files.internal("world/interior.png"));
     private final TextureRegion[] tiles = TextureRegion.split(interiorTexture, 48, 48)[0];
-    private final Texture temPadTexture = new Texture(Gdx.files.internal("tempad.png"));
+    private final Texture temPadTexture = new Texture(Gdx.files.internal("world/tempad.png"));
     private final TextureRegion temPadSprite = new TextureRegion(temPadTexture);
     private final Music music = Gdx.audio.newMusic(Gdx.files.internal("sounds/timeline-music.wav"));
     private final Sound pickupSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pickup.wav"));

@@ -25,7 +25,7 @@ public final class MenuScreen extends ScreenAdapter {
     private final GameUi ui = new GameUi();
     private final Stage stage = new Stage(new FitViewport(1200, 800));
     private final SpriteBatch batch = new SpriteBatch();
-    private final Texture background = new Texture(Gdx.files.internal("menu-background.png"));
+    private final Texture background = new Texture(Gdx.files.internal("ui/menu-background.png"));
     private final Texture shade;
     private final EnumMap<PlayerSkin, Texture> skinTextures = new EnumMap<>(PlayerSkin.class);
     private final EnumMap<PlayerSkin, Button> skinButtons = new EnumMap<>(PlayerSkin.class);

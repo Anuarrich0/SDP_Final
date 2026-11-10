@@ -4,10 +4,10 @@ import loki.factory.LokiCreator;
 import loki.factory.LokiVariant;
 
 public enum PlayerSkin {
-    CLASSIC("Classic", "loki-classic.png", new LokiCreator.ClassicCreator()),
-    ORDINARY("Ordinary Loki", "loki-ordinary.png", new LokiCreator.OrdinaryCreator()),
-    SYLVIE("Sylvie", "sylvie.png", new LokiCreator.SylvieCreator()),
-    ALLIGATOR("Alligator", "loki-alligator.png", new LokiCreator.AlligatorCreator());
+    CLASSIC("Classic", "characters/loki-classic.png", new LokiCreator.ClassicCreator()),
+    ORDINARY("Ordinary Loki", "characters/loki-ordinary.png", new LokiCreator.OrdinaryCreator()),
+    SYLVIE("Sylvie", "characters/sylvie.png", new LokiCreator.SylvieCreator()),
+    ALLIGATOR("Alligator", "characters/loki-alligator.png", new LokiCreator.AlligatorCreator());
 
     private final String displayName;
     private final String textureFile;
