@@ -6,18 +6,17 @@ import loki.game.Player;
 
 /** CHASE: each hunter type cuts Loki off in its own way. */
 public final class ChaseStrategy implements GuardStrategy {
-    private static final float SPEED = 160;
     private static final int X5_FAR_CELLS = 8;
 
     @Override
     public void update(Guard guard, Level level, HuntContext context) {
         Level.Cell target = switch (guard.type()) {
-            case B15 -> context.prey();                                     // straight for Loki's cell
-            case D90 -> ahead(context.prey(), context.preyDirection(), 4);  // four cells ahead
-            case C20 -> ambush(context);                                    // mirror of B-15
-            case X5 -> far(guard, context) ? context.prey() : guard.scatterCorner();
+        case B15 -> context.prey(); // straight for Loki's cell
+        case D90 -> ahead(context.prey(), context.preyDirection(), 4); // four cells ahead
+        case C20 -> ambush(context); // mirror of B-15
+        case X5 -> far(guard, context) ? context.prey() : guard.scatterCorner();
         };
-        guard.steerTo(level, target, SPEED);
+        guard.steerTo(level, target);
     }
 
     /** C-20: the cell two ahead of Loki, doubled from the lead hunter - i.e. the far side of the chase. */
@@ -36,11 +35,11 @@ public final class ChaseStrategy implements GuardStrategy {
 
     private static Level.Cell ahead(Level.Cell cell, Player.Direction direction, int cells) {
         return switch (direction) {
-            case UP -> new Level.Cell(cell.x() - cells, cell.y() + cells);
-            case DOWN -> new Level.Cell(cell.x(), cell.y() - cells);
-            case LEFT -> new Level.Cell(cell.x() - cells, cell.y());
-            case RIGHT -> new Level.Cell(cell.x() + cells, cell.y());
-            default -> cell;
+        case UP -> new Level.Cell(cell.x() - cells, cell.y() + cells);
+        case DOWN -> new Level.Cell(cell.x(), cell.y() - cells);
+        case LEFT -> new Level.Cell(cell.x() - cells, cell.y());
+        case RIGHT -> new Level.Cell(cell.x() + cells, cell.y());
+        default -> cell;
         };
     }
 }

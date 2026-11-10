@@ -1,12 +1,19 @@
 package loki.decorator;
 
 import loki.factory.LokiVariant;
+
 public class TimeShield extends EquipmentDecorator {
-    public TimeShield(LokiVariant wrapped) { super(wrapped); }
+    public TimeShield(LokiVariant wrapped) {
+        super(wrapped);
+    }
 
     @Override
-    public int getFailurePenalty() { return 10; }
+    public int getFailurePenalty() {
+        return 10;
+    }
 
     @Override
-    public String getDescription() { return wrapped.getDescription() + " + временной щит"; }
+    public String getDescription() {
+        return wrapped.getDescription() + " + временной щит";
+    }
 }

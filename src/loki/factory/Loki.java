@@ -1,4 +1,5 @@
 package loki.factory;
+
 public class Loki implements LokiVariant {
     private final String name;
     private final int magicPower;
@@ -30,6 +31,11 @@ public class Loki implements LokiVariant {
         return magicPower;
     }
 
-    public int getCombatPower() { return combatPower; }
-    public int getDiplomacy() { return diplomacy; }
+    public int getCombatPower() {
+        return combatPower;
+    }
+
+    public int getDiplomacy() {
+        return diplomacy;
+    }
 }

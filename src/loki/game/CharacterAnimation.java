@@ -1,7 +1,9 @@
 package loki.game;
 
 public final class CharacterAnimation {
-    public enum Direction { DOWN, UP, RIGHT, LEFT }
+    public enum Direction {
+        DOWN, UP, RIGHT, LEFT
+    }
 
     private Direction direction = Direction.DOWN;
     private float distance;
@@ -21,18 +23,25 @@ public final class CharacterAnimation {
 
     /** Set direction explicitly (for grid-based movement). */
     public void updateDirection(Player.Direction dir) {
-        if (dir == null || dir == Player.Direction.NONE) return;
+        if (dir == null || dir == Player.Direction.NONE) {
+            return;
+        }
         direction = switch (dir) {
-            case UP -> Direction.UP;
-            case DOWN -> Direction.DOWN;
-            case LEFT -> Direction.LEFT;
-            case RIGHT -> Direction.RIGHT;
-            default -> direction;
+        case UP -> Direction.UP;
+        case DOWN -> Direction.DOWN;
+        case LEFT -> Direction.LEFT;
+        case RIGHT -> Direction.RIGHT;
+        default -> direction;
         };
     }
 
-    public Direction direction() { return direction; }
-    public int frame() { return frame; }
+    public Direction direction() {
+        return direction;
+    }
+
+    public int frame() {
+        return frame;
+    }
 
     public void update(float dx, float dy) {
         float moved = (float) Math.hypot(dx, dy);
@@ -48,9 +57,9 @@ public final class CharacterAnimation {
         }
         distance = (distance + moved) % 48;
         frame = switch ((int) (distance / 12)) {
-            case 0 -> 1;
-            case 2 -> 2;
-            default -> 0;
+        case 0 -> 1;
+        case 2 -> 2;
+        default -> 0;
         };
     }
 }

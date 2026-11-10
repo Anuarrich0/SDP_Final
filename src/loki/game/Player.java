@@ -6,10 +6,14 @@ import java.util.Objects;
 
 public final class Player {
     public static final float RADIUS = 13;
-    public enum Direction { UP, DOWN, LEFT, RIGHT, NONE }
+
+    public enum Direction {
+        UP, DOWN, LEFT, RIGHT, NONE
+    }
+
     private final LokiVariant variant;
-    private Level.Cell cell, target;
-    private float x, y, progress = 1, moveSpeed, dashTime;
+    private Level.Cell startCell, targetCell;
+    private float x, y, moveProgress = 1, moveSpeed, dashTime;
     private boolean houseAccess;
     private Direction direction = Direction.NONE, nextDirection = Direction.NONE;
 
@@ -18,102 +22,188 @@ public final class Player {
         moveSpeed = 150 + variant.getCombatPower() * .4f;
         setPosition(spawn);
     }
+
+    // Клон сохраняет положение между клетками, без скачка к центру.
     Player(Player source) {
-        variant=source.variant;cell=source.cell;target=source.target;
-        x=source.x;y=source.y;progress=source.progress;
-        moveSpeed=source.moveSpeed;direction=source.direction;
+        variant = source.variant;
+        startCell = source.startCell;
+        targetCell = source.targetCell;
+        x = source.x;
+        y = source.y;
+        moveProgress = source.moveProgress;
+        moveSpeed = source.moveSpeed;
+        direction = source.direction;
     }
-    public LokiVariant variant() { return variant; }
-    public float x() { return x; }
-    public float y() { return y; }
-    public float speed() { return moveSpeed; }
+
+    public LokiVariant variant() {
+        return variant;
+    }
+
+    public float x() {
+        return x;
+    }
+
+    public float y() {
+        return y;
+    }
+
+    public float speed() {
+        return moveSpeed;
+    }
+
     public void setSpeed(float speed) {
-        if (!Float.isFinite(speed) || speed <= 0) throw new IllegalArgumentException("Invalid speed");
+        if (!Float.isFinite(speed) || speed <= 0) {
+            throw new IllegalArgumentException("Invalid speed");
+        }
         moveSpeed = speed;
     }
-    public Direction currentDirection() { return direction; }
-    public Level.Cell currentCell() {
-        return new Level.Cell((int)Math.floor(x / Level.TILE), (int)Math.floor(y / Level.TILE));
-    }
-    public boolean isMoving() { return progress < 1; }
-    public float timeToCenter() { return isMoving() ? (1-progress)*Level.TILE/moveSpeed : Level.TILE/moveSpeed; }
-    boolean canMove(Level level, Level.Cell from, Direction dir) {
-        Level.Cell next = neighbor(level,from,dir);
-        return dir != Direction.NONE && level.canEnter(next,houseAccess);
-    }
-    void setHouseAccess(boolean value) { houseAccess=value; }
-    public void cancelDash() { dashTime=0; }
-    public static Level.Cell neighbor(Level level, Level.Cell from, Direction dir) {
-        Level.Cell next=step(from,dir);
-        return level.neighbor(from,next.x()-from.x(),next.y()-from.y());
-    }
-    public void queueDirection(Direction dir) { nextDirection = Objects.requireNonNull(dir); }
 
-    public void update(Level level, Direction input, float dt) {
+    public Direction currentDirection() {
+        return direction;
+    }
+
+    public Level.Cell currentCell() {
+        return new Level.Cell((int) Math.floor(x / Level.TILE), (int) Math.floor(y / Level.TILE));
+    }
+
+    public boolean isMoving() {
+        return moveProgress < 1;
+    }
+
+    public float timeToCenter() {
+        return isMoving() ? (1 - moveProgress) * Level.TILE / moveSpeed : Level.TILE / moveSpeed;
+    }
+
+    boolean canMove(Level level, Level.Cell from, Direction direction) {
+        Level.Cell next = neighbor(level, from, direction);
+        return direction != Direction.NONE && level.canEnter(next, houseAccess);
+    }
+
+    void setHouseAccess(boolean value) {
+        houseAccess = value;
+    }
+
+    public void cancelDash() {
+        dashTime = 0;
+    }
+
+    public static Level.Cell neighbor(Level level, Level.Cell from, Direction direction) {
+        Level.Cell next = step(from, direction);
+        return level.neighbor(from, next.x() - from.x(), next.y() - from.y());
+    }
+
+    public void queueDirection(Direction direction) {
+        nextDirection = Objects.requireNonNull(direction);
+    }
+
+    public void update(Level level, Direction input, float deltaTime) {
         Objects.requireNonNull(input);
-        if (!Float.isFinite(dt) || dt <= 0 || dt > .05f) throw new IllegalArgumentException("Invalid time step");
-        if (input != Direction.NONE) nextDirection = input;
-        if (isMoving() && nextDirection == opposite(direction)) reverse();
-        float time = dt;
-        while (time > .000001f) {
+        if (!Float.isFinite(deltaTime) || deltaTime <= 0 || deltaTime > .05f) {
+            throw new IllegalArgumentException("Invalid time step");
+        }
+        if (input != Direction.NONE) {
+            nextDirection = input;
+        }
+        if (isMoving() && nextDirection == opposite(direction)) {
+            reverse();
+        }
+        float remainingTime = deltaTime;
+        // Не теряем остаток времени при переходе в следующую клетку.
+        while (remainingTime > .000001f) {
             if (!isMoving()) {
-                Direction turn = canMove(level, cell, nextDirection) ? nextDirection : direction;
-                if (!canMove(level, cell, turn)) { dashTime = 0; break; }
+                Direction turn = canMove(level, startCell, nextDirection) ? nextDirection : direction;
+                if (!canMove(level, startCell, turn)) {
+                    dashTime = 0;
+                    break;
+                }
                 direction = turn;
-                target = neighbor(level,cell,direction);
-                progress = 0;
-                if (turn == nextDirection) nextDirection = Direction.NONE;
+                targetCell = neighbor(level, startCell, direction);
+                moveProgress = 0;
+                if (turn == nextDirection) {
+                    nextDirection = Direction.NONE;
+                }
             }
-            if (level.suppressed(cell) || level.suppressed(target)) dashTime=0;
+            if (level.suppressed(startCell) || level.suppressed(targetCell)) {
+                dashTime = 0;
+            }
             float speed = moveSpeed * (dashTime > 0 ? 3 : 1);
-            float used = Math.min(time, (1 - progress) * Level.TILE / speed);
-            if (dashTime > 0) used = Math.min(used, dashTime);
-            progress = Math.min(1, progress + used * speed / Level.TILE);
-            time -= used;
-            dashTime = Math.max(0, dashTime - used);
-            if (progress > .99999f) { progress = 1; cell = target; }
-            float dx=target.worldX()-cell.worldX();
-            float width=level.width()*Level.TILE;
-            if (dx>Level.TILE) dx-=width;
-            else if (dx < -Level.TILE) dx+=width;
-            x=(cell.worldX()+dx*progress+width)%width;
-            y = cell.worldY() + (target.worldY() - cell.worldY()) * progress;
+            float stepTime = Math.min(remainingTime, (1 - moveProgress) * Level.TILE / speed);
+            if (dashTime > 0) {
+                stepTime = Math.min(stepTime, dashTime);
+            }
+            moveProgress = Math.min(1, moveProgress + stepTime * speed / Level.TILE);
+            remainingTime -= stepTime;
+            dashTime = Math.max(0, dashTime - stepTime);
+            if (moveProgress > .99999f) {
+                moveProgress = 1;
+                startCell = targetCell;
+            }
+            float dx = targetCell.worldX() - startCell.worldX();
+            float width = level.width() * Level.TILE;
+            // Через туннель идём по короткому пути через край экрана.
+            if (dx > Level.TILE) {
+                dx -= width;
+            } else if (dx < -Level.TILE) {
+                dx += width;
+            }
+            x = (startCell.worldX() + dx * moveProgress + width) % width;
+            y = startCell.worldY() + (targetCell.worldY() - startCell.worldY()) * moveProgress;
         }
     }
+
     public boolean startDash(Direction lastInput) {
-        if (dashTime > 0 || (direction == Direction.NONE && lastInput == Direction.NONE)) return false;
-        if (direction == Direction.NONE) nextDirection = lastInput;
+        if (dashTime > 0 || (direction == Direction.NONE && lastInput == Direction.NONE)) {
+            return false;
+        }
+        if (direction == Direction.NONE) {
+            nextDirection = lastInput;
+        }
         dashTime = Level.TILE * 2 / (moveSpeed * 3);
         return true;
     }
+
     public void reverse() {
-        if (direction == Direction.NONE) return;
+        if (direction == Direction.NONE) {
+            return;
+        }
         if (isMoving()) {
-            Level.Cell old = cell; cell = target; target = old;
-            progress = 1 - progress;
+            Level.Cell old = startCell;
+            startCell = targetCell;
+            targetCell = old;
+            moveProgress = 1 - moveProgress;
         }
         direction = opposite(direction);
         nextDirection = Direction.NONE;
     }
+
     public void setPosition(Level.Cell spawn) {
-        cell = Objects.requireNonNull(spawn); target = cell;
-        x = cell.worldX(); y = cell.worldY(); progress = 1; dashTime = 0;
-        direction = Direction.NONE; nextDirection = Direction.NONE;
+        startCell = Objects.requireNonNull(spawn);
+        targetCell = startCell;
+        x = startCell.worldX();
+        y = startCell.worldY();
+        moveProgress = 1;
+        dashTime = 0;
+        direction = Direction.NONE;
+        nextDirection = Direction.NONE;
     }
-    public static Direction opposite(Direction dir) {
-        return switch (dir) {
-            case UP -> Direction.DOWN; case DOWN -> Direction.UP;
-            case LEFT -> Direction.RIGHT; case RIGHT -> Direction.LEFT;
-            default -> Direction.NONE;
+
+    public static Direction opposite(Direction direction) {
+        return switch (direction) {
+        case UP -> Direction.DOWN;
+        case DOWN -> Direction.UP;
+        case LEFT -> Direction.RIGHT;
+        case RIGHT -> Direction.LEFT;
+        default -> Direction.NONE;
         };
     }
-    public static Level.Cell step(Level.Cell cell, Direction dir) {
-        return switch (dir) {
-            case UP -> new Level.Cell(cell.x(), cell.y()+1);
-            case DOWN -> new Level.Cell(cell.x(), cell.y()-1);
-            case LEFT -> new Level.Cell(cell.x()-1, cell.y());
-            case RIGHT -> new Level.Cell(cell.x()+1, cell.y());
-            default -> cell;
+
+    public static Level.Cell step(Level.Cell startCell, Direction direction) {
+        return switch (direction) {
+        case UP -> new Level.Cell(startCell.x(), startCell.y() + 1);
+        case DOWN -> new Level.Cell(startCell.x(), startCell.y() - 1);
+        case LEFT -> new Level.Cell(startCell.x() - 1, startCell.y());
+        case RIGHT -> new Level.Cell(startCell.x() + 1, startCell.y());
+        default -> startCell;
         };
     }
 }
