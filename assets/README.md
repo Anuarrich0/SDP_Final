@@ -9,12 +9,12 @@ This directory contains the assets loaded by the current version.
 | `sylvie.png` | Sylvie: blonde hair, broken horn, dark outfit |
 | `loki-alligator.png` | Alligator with small golden horns |
 | `b15.png`, `d90.png`, `c20.png`, `x5.png` | Four guard types |
-| `interior.png` | Four 48×48 tiles: floor, alternate floor, wall, alternate wall |
-| `tempad.png` | TemPad collectible, 48×48 |
+| `interior.png` | Four 48Г—48 tiles: floor, alternate floor, wall, alternate wall |
+| `tempad.png` | TemPad collectible, 48Г—48 |
 | `menu-background.png` | Main menu background |
-| `ui/interface.fnt`, `ui/interface.png` | Bitmap font with Cyrillic support |
+| `ui/interface.fnt`, `ui/interface.png` | Press Start 2P pixel bitmap font |
 
-Character sprite sheets are 192×288 RGBA. Each contains nine 64×96 frames.
+Character sprite sheets are 192Г—288 RGBA. Each contains nine 64Г—96 frames.
 Rows from top to bottom: down, up, right. Columns: idle, walk A, walk B.
 The game mirrors the right-facing profile to face left. The background is transparent; the foot baseline is y=88.
 CharacterAnimation selects frames based on movement; animation freezes while paused.
@@ -37,7 +37,7 @@ Page order: 1, 2, 3, 7, 8, 9, 4, 5, 6.
 Interior and TemPad:
 https://www.canva.com/design/DAHaWk6-39M/npsVpeJ0YMUslvqCra_ObQ/edit
 TemPad was extracted from the third cell of the previous item atlas without changing its pixels.
-GameScreen draws the terminal, portal, and NULL markers; they have no separate textures.
+GameScreen draws the terminal and portal; they have no separate textures.
 
 ## Generated images
 
@@ -47,7 +47,7 @@ resized, aligned, and packed. Artwork is not generated at runtime.
 
 Sprite prompts: match the classic sprite's coarse angular pixel style,
 muted green/gold palette, dark outline and simple shading; transparent background;
-exact 3×3 grid, 64:96 cell aspect, DOWN/UP/RIGHT rows, idle/walk A/walk B columns;
+exact 3Г—3 grid, 64:96 cell aspect, DOWN/UP/RIGHT rows, idle/walk A/walk B columns;
 consistent identity and centering; no text, grid or shadows.
 
 - Ordinary: dark-haired fictional male trickster, white rolled-sleeve office shirt,
@@ -64,5 +64,7 @@ brass elevators, analog clocks, teak desks, case files, green consoles, branchin
 timeline; emerald and burnt-orange light, painterly realism, landscape 16:9;
 quiet dark left side, no people, text, logos, watermark or UI elements.
 
-The interface font was prepared from the installed Segoe UI font. The FNT and PNG files
-are ready to load in LibGDX; no additional libraries are required.
+The interface uses [Press Start 2P](https://github.com/google/fonts/tree/main/ofl/pressstart2p)
+by CodeMan38 under the SIL Open Font License (see `ui/PressStart2P-OFL.txt`).
+The font is rasterized at its native 8-pixel grid and enlarged with nearest-neighbor
+sampling. The FNT and PNG files load directly in LibGDX; no extra runtime libraries are required.

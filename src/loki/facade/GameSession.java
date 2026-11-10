@@ -90,16 +90,12 @@ public final class GameSession {
         return frightenedTime;
     }
 
-    public boolean magicBlocked() {
-        return level.suppressed(player.currentCell());
-    }
-
     public float timeStop() {
         return timeStop;
     }
 
     public boolean stopTime() {
-        if (state != State.PLAYING || magicBlocked() || timeStopCooldown > 0) {
+        if (state != State.PLAYING || timeStopCooldown > 0) {
             return false;
         }
         timeStop = 1.5f;
@@ -149,7 +145,7 @@ public final class GameSession {
     }
 
     public boolean illusion() {
-        if (state != State.PLAYING || magicBlocked() || illusionCooldown > 0) {
+        if (state != State.PLAYING || illusionCooldown > 0) {
             return false;
         }
         float duration = 2 + player.variant().getMagicPower() / 40f;
@@ -162,7 +158,7 @@ public final class GameSession {
     }
 
     public boolean dash() {
-        if (state != State.PLAYING || magicBlocked() || dashCooldown > 0) {
+        if (state != State.PLAYING || dashCooldown > 0) {
             return false;
         }
         boolean started = player.startDash(lastInputDir);
@@ -241,11 +237,6 @@ public final class GameSession {
 
     private boolean updateAbilities(float deltaTime) {
         timeStopCooldown = Math.max(0, timeStopCooldown - deltaTime);
-        if (magicBlocked()) {
-            timeStop = 0;
-            illusion = null;
-            player.cancelDash();
-        }
         boolean frozen = timeStop > 0;
         timeStop = Math.max(0, timeStop - deltaTime);
         dashCooldown = Math.max(0, dashCooldown - deltaTime);

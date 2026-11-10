@@ -63,8 +63,7 @@ moving randomly. Normal behavior resumes when the clone disappears.
 The side tunnel connects the edges of the middle row. Guards slow down in the
 three outermost cells at each end. Collision detection accounts for the wraparound.
 Q lets Loki safely pass frozen guards; the release queue and mode timers also
-pause. Orange NULL cells suppress abilities, remove the clone, and end an active
-time stop.
+pause.
 
 ## Guards
 

@@ -80,7 +80,7 @@ public final class MenuScreen extends ScreenAdapter {
             Table content = new Table();
             content.setBackground(ui.panel("10251FF5"));
             content.add(preview).size(80, 120).padTop(8).row();
-            content.add(ui.label(skin.displayName(), .46f, Color.WHITE)).pad(8, 4, 12, 4);
+            content.add(ui.label(skin.displayName(), .375f, Color.WHITE)).pad(8, 4, 12, 4);
             Button button = new Button(style);
             button.setName("skin-" + skin.name());
             button.add(content).grow().pad(2);

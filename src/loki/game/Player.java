@@ -79,10 +79,6 @@ public final class Player {
         houseAccess = value;
     }
 
-    public void cancelDash() {
-        dashTime = 0;
-    }
-
     public static Level.Cell neighbor(Level level, Level.Cell from, Direction direction) {
         Level.Cell next = step(from, direction);
         return level.neighbor(from, next.x() - from.x(), next.y() - from.y());
@@ -118,9 +114,6 @@ public final class Player {
                 if (turn == nextDirection) {
                     nextDirection = Direction.NONE;
                 }
-            }
-            if (level.suppressed(startCell) || level.suppressed(targetCell)) {
-                dashTime = 0;
             }
             float speed = moveSpeed * (dashTime > 0 ? 3 : 1);
             float stepTime = Math.min(remainingTime, (1 - moveProgress) * Level.TILE / speed);

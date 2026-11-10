@@ -22,7 +22,7 @@ public final class GameUi implements Disposable {
 
     public GameUi() {
         BitmapFont font = new BitmapFont(Gdx.files.internal("ui/interface.fnt"));
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         skin.add("default-font", font);
         Pixmap pixels = new Pixmap(24, 24, Pixmap.Format.RGBA8888);
         pixels.setColor(Color.WHITE);

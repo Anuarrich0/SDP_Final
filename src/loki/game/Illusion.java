@@ -48,10 +48,7 @@ public final class Illusion {
                     if (direction == Player.Direction.NONE || !body.canMove(level, body.currentCell(), direction)) {
                         continue;
                     }
-                    Level.Cell next = Player.neighbor(level, body.currentCell(), direction);
-                    if (!level.suppressed(next)) {
-                        choices.add(direction);
-                    }
+                    choices.add(direction);
                 }
                 if (choices.size() > 1) {
                     choices.remove(Player.opposite(body.currentDirection()));
@@ -68,10 +65,6 @@ public final class Illusion {
             float stepTime = Math.min(remainingTime, body.timeToCenter());
             body.update(level, Player.Direction.NONE, stepTime);
             remainingTime -= stepTime;
-            if (level.suppressed(body.currentCell())) {
-                timeLeft = 0;
-                return;
-            }
         }
     }
 }

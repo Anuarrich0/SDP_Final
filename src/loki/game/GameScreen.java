@@ -31,7 +31,7 @@ public final class GameScreen extends ScreenAdapter {
     private final FitViewport viewport = new FitViewport(25 * Level.TILE, 19 * Level.TILE, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
     private final SpriteBatch batch = new SpriteBatch();
-    private final BitmapFont font = new BitmapFont();
+    private final BitmapFont font = new BitmapFont(Gdx.files.internal("ui/interface.fnt"));
     private final Texture lokiTexture;
     private final TextureRegion[][] lokiSprites;
     private CharacterAnimation playerAnimation;
@@ -59,6 +59,8 @@ public final class GameScreen extends ScreenAdapter {
 
     public GameScreen(LokiGame game) {
         this.game = game;
+        font.getData().setScale(.25f);
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         skin = game.selectedSkin();
         lokiTexture = new Texture(Gdx.files.internal(skin.textureFile()));
         lokiSprites = createSprites(lokiTexture);
@@ -165,8 +167,7 @@ public final class GameScreen extends ScreenAdapter {
                 int tile = level.wall(x, y) ? 2 + ((x + y) % 7 == 0 ? 1 : 0) : ((x * 7 + y * 3) % 11 == 0 ? 1 : 0);
                 if (level.house(new Level.Cell(x, y))) {
                     batch.setColor(.48f, .58f, .64f, 1);
-                } else if (level.suppressed(new Level.Cell(x, y))) {
-                    batch.setColor(1, .55f, .2f, 1);
+
                 }
                 batch.draw(tiles[tile], x * Level.TILE, y * Level.TILE, Level.TILE, Level.TILE);
                 batch.setColor(Color.WHITE);
@@ -236,13 +237,6 @@ public final class GameScreen extends ScreenAdapter {
         font.draw(batch, "EXIT", level.exit().worldX() - 13, level.exit().worldY() + 35);
         font.setColor(Color.GOLD);
         font.draw(batch, "TVA", level.door().worldX() - 14, level.door().worldY() + 19);
-        for (int y = 0; y < level.height(); y++) {
-            for (int x = 0; x < level.width(); x++) {
-                if (level.suppressed(new Level.Cell(x, y))) {
-                    font.draw(batch, "NULL", x * Level.TILE + 7, y * Level.TILE + 31);
-                }
-            }
-        }
         font.setColor(Color.WHITE);
         // Actors higher up the map are drawn behind the player.
         for (int i = 0; i < session.guards().size(); i++) {

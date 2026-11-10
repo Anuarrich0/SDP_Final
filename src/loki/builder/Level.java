@@ -134,14 +134,6 @@ public final class Level {
         return cell.x() >= door.x() - 3 && cell.x() <= door.x() + 3 && cell.y() >= door.y() - 2 && cell.y() < door.y();
     }
 
-    public boolean suppressed(Cell cell) {
-        return symbol(cell) == 'M';
-    }
-
-    private char symbol(Cell cell) {
-        return wall(cell.x(), cell.y()) ? '#' : rows.get(height() - 1 - cell.y()).charAt(cell.x());
-    }
-
     public boolean canEnter(Cell cell, boolean houseAccess) {
         return !wall(cell.x(), cell.y()) && (houseAccess || (!house(cell) && !cell.equals(door)));
     }
@@ -217,7 +209,7 @@ public final class Level {
 
         public Level build() {
             if (rows.size() < 3 || rows.get(0).length() < 3 || rows.stream()
-                    .anyMatch(r -> r.length() != rows.get(0).length() || !r.matches("[#.SPGCTODHM_]+"))) {
+                    .anyMatch(r -> r.length() != rows.get(0).length() || !r.matches("[#.SPGCTODH_]+"))) {
                 throw new IllegalArgumentException("Invalid map rows");
             }
             return new Level(rows);
@@ -231,15 +223,15 @@ public final class Level {
                 "#.###.###.##.##.###.###.#",
                 "#.###.###.##.##.###.###.#",
                 "#.###.###.##.##.###.###.#",
-                "#....M.............T....#",
+                "#..................T....#",
                 "#.###.###.##.##.###.###.#",
                 "#..........._...........#",
                 "#.###.#.####D####.#.###.#",
-                "_.......#HHHHHHH#..M...._",
+                "_.......#HHHHHHH#......._",
                 "#.###.#.#HGHGHGH#.#.###.#",
                 "#.###.#.#########.#.###.#",
                 "#.###.###.##.##.###.###.#",
-                "#....M......C...........#",
+                "#...........C...........#",
                 "#.###.###.##.##.###.###.#",
                 "#.###.###.##.##.###.###.#",
                 "#.###.###.##.##.###.###.#",
