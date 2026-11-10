@@ -26,7 +26,7 @@ public final class GameSession {
 
     private static final float[] MODE_SECONDS = { 7, 20, 7, 20, 5, 20, 5, Float.POSITIVE_INFINITY };
 
-    public record Snapshot(int health, int charges, int required, boolean terminalOn, boolean exitOpen, State state) {
+    public record Snapshot(int health, int charges, boolean terminalOn, State state) {
     }
 
     private final Level level;
@@ -55,25 +55,25 @@ public final class GameSession {
     private boolean terminalActive;
     private State state = State.PLAYING;
 
-    public GameSession(Level level, LokiVariant hero) {
+    public GameSession(Level level, LokiVariant hero, int difficulty) {
         this.level = Objects.requireNonNull(level);
         player = new Player(hero, level.spawn());
-        guards = createGuards(level);
+        guards = createGuards(level, difficulty);
         leader = guards.get(0);
         charges = new ArrayList<>(level.charges());
         powers = new ArrayList<>(level.powers());
         dots = new ArrayList<>(level.dots());
     }
 
-    private static List<Guard> createGuards(Level level) {
+    private static List<Guard> createGuards(Level level, int difficulty) {
         GuardType[] types = GuardType.values();
         if (level.guards().size() != 3) {
             throw new IllegalArgumentException("Need three house spawns");
         }
         List<Guard> created = new ArrayList<>();
-        created.add(new Guard(level, level.houseExit(), GuardType.B15));
+        created.add(new Guard(level, level.houseExit(), GuardType.B15, difficulty));
         for (int i = 1; i < types.length; i++) {
-            created.add(new Guard(level, level.guards().get(i - 1), types[i]));
+            created.add(new Guard(level, level.guards().get(i - 1), types[i], difficulty));
         }
         return List.copyOf(created);
     }
@@ -132,13 +132,16 @@ public final class GameSession {
         return guards;
     }
 
+    public int remainingItems() {
+        return dots.size() + powers.size() + charges.size();
+    }
+
     public List<Level.Cell> charges() {
         return List.copyOf(charges);
     }
 
     public Snapshot snapshot() {
-        return new Snapshot(health, level.charges().size() - charges.size(), level.charges().size(), terminalActive,
-                isExitOpen(), state);
+        return new Snapshot(health, level.charges().size() - charges.size(), terminalActive, state);
     }
 
     public void addListener(GameListener listener) {

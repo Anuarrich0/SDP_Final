@@ -7,8 +7,9 @@ Assets are grouped by purpose:
 - `ui/`: menu background, bitmap font, font source and license.
 - `sounds/`: music and sound effects.
 
-`ui/hud-atlas.png` and `ui/miss-minutes-timer-empty.png` are prepared artwork
-for future HUD work; they are not loaded by the game yet.
+`ui/icons/` contains the health hearts and ability icons used by the HUD.
+`ui/miss-minutes-timer-empty.png` is the timer frame; the time is drawn by the game.
+The TTF file and its license are retained as the source of the bitmap font.
 
 The following assets are loaded by the current version:
 

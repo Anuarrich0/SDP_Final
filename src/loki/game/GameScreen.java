@@ -31,7 +31,7 @@ import loki.observer.GameListener;
 
 public final class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera = new OrthographicCamera();
-    // The world is one green strip taller than the level on both sides, so the HUD never covers the maze.
+    // Leave space above and below the maze for the HUD.
     private final FitViewport viewport = new FitViewport(25 * Level.TILE, 19 * Level.TILE + 2 * STRIP, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
     private final SpriteBatch batch = new SpriteBatch();
@@ -55,22 +55,16 @@ public final class GameScreen extends ScreenAdapter {
     private final Texture illusionIconTexture = new Texture(Gdx.files.internal("ui/icons/ability-2.png"));
     private final Texture timeStopIconTexture = new Texture(Gdx.files.internal("ui/icons/ability-3.png"));
     private final Texture timerTexture = new Texture(Gdx.files.internal("ui/miss-minutes-timer-empty.png"));
-    private final TextureRegion heartFull = new TextureRegion(heartFullTexture);
-    private final TextureRegion heartHalf = new TextureRegion(heartHalfTexture);
-    private final TextureRegion heartEmpty = new TextureRegion(heartEmptyTexture);
-    private final TextureRegion timerSprite = new TextureRegion(timerTexture);
     private final GlyphLayout centeredLayout = new GlyphLayout();
     private static final Color DIMMED = new Color(1, 1, 1, .35f);
     private static final Color STRIP_GREEN = new Color(.06f, .26f, .16f, 1);
     private static final int HEARTS = 5;
-    /** Height of the green status strips, and the square size of every HUD icon. */
     private static final float STRIP = 76, ICON = 44, PAD = 12;
-    /** Ability labels sit in the strip below their icon: icon gap, text box height, bottom padding. */
     private static final float ICON_GAP = 4, LABEL_HEIGHT = 16, TEXT_PAD = 6;
-    /** Centre of the clock reading inside the timer sprite, as a fraction of the sprite size. */
     private static final float TIMER_TEXT_X = .62f, TIMER_TEXT_Y = .39f;
     private static final String[] ABILITY_KEYS = { "SPACE", "E", "Q" };
     private float playTime;
+    private int levelNumber = 1;
     private final Music music = Gdx.audio.newMusic(Gdx.files.internal("sounds/timeline-music.wav"));
     private final Sound pickupSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pickup.wav"));
     private final Sound dashSound = Gdx.audio.newSound(Gdx.files.internal("sounds/dash.wav"));
@@ -127,7 +121,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         LokiVariant hero = new TimeShield(new MagicAmplifier(skin.createVariant()));
         illusionAnimation = null;
-        session = new GameSession(Level.tva(), hero);
+        session = new GameSession(Level.tva(levelNumber), hero, levelNumber);
         playerAnimation = new CharacterAnimation(session.player().x(), session.player().y());
         guardAnimations = new ArrayList<>();
         for (Guard guard : session.guards()) {
@@ -168,6 +162,11 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private void updateGame(float deltaTime) {
+        if (snapshot.state() == GameSession.State.WON && levelNumber < 3) {
+            levelNumber++;
+            restart();
+            return;
+        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             restart();
         }
@@ -197,14 +196,14 @@ public final class GameScreen extends ScreenAdapter {
             if (inputDirection != Player.Direction.NONE) {
                 session.player().queueDirection(inputDirection);
             }
-            int itemsBefore = session.dots().size() + session.powers().size() + session.charges().size();
+            int itemsBefore = session.remainingItems();
             elapsed += Math.min(deltaTime, .25f);
-            while (elapsed >= 1f / 120) {
+            while (elapsed >= 1f / 120 && canPlay()) {
                 session.update(1f / 120, inputDirection);
                 elapsed -= 1f / 120;
                 playTime += 1f / 120;
             }
-            int itemsAfter = session.dots().size() + session.powers().size() + session.charges().size();
+            int itemsAfter = session.remainingItems();
             if (itemsAfter < itemsBefore) {
                 pickupSound.play(.2f);
             }
@@ -235,7 +234,6 @@ public final class GameScreen extends ScreenAdapter {
                 int tile = level.wall(x, y) ? 2 + ((x + y) % 7 == 0 ? 1 : 0) : ((x * 7 + y * 3) % 11 == 0 ? 1 : 0);
                 if (level.house(new Level.Cell(x, y))) {
                     batch.setColor(.48f, .58f, .64f, 1);
-
                 }
                 batch.draw(tiles[tile], x * Level.TILE, y * Level.TILE, Level.TILE, Level.TILE);
                 batch.setColor(Color.WHITE);
@@ -325,7 +323,6 @@ public final class GameScreen extends ScreenAdapter {
         batch.end();
     }
 
-    /** Green status strips: lives, orbs and the timer above the maze, ability slots below it. */
     private void drawHud(Level level) {
         float width = level.width() * Level.TILE, height = level.height() * Level.TILE;
         shapes.setProjectionMatrix(camera.combined);
@@ -343,11 +340,11 @@ public final class GameScreen extends ScreenAdapter {
         float perHeart = 100f / HEARTS;
         for (int i = 0; i < HEARTS; i++) {
             float rest = health - i * perHeart;
-            TextureRegion heart = rest <= 0 ? heartEmpty : rest < perHeart ? heartHalf : heartFull;
+            Texture heart = rest <= 0 ? heartEmptyTexture : rest < perHeart ? heartHalfTexture : heartFullTexture;
             batch.draw(heart, PAD + i * (ICON + 4), topY, ICON, ICON);
         }
         int total = level.dots().size() + level.powers().size() + level.charges().size();
-        int orbsLeft = session.dots().size() + session.powers().size() + session.charges().size();
+        int orbsLeft = session.remainingItems();
         float orbsX = PAD + HEARTS * (ICON + 4) + 16;
         batch.draw(temPadSprite, orbsX, topY, ICON, ICON);
         hudFont.setColor(Color.WHITE);
@@ -356,12 +353,15 @@ public final class GameScreen extends ScreenAdapter {
         float timerHeight = 56;
         float timerWidth = timerHeight * timerTexture.getWidth() / timerTexture.getHeight();
         float timerX = width - PAD - timerWidth, timerY = height + (STRIP - timerHeight) / 2;
-        batch.draw(timerSprite, timerX, timerY, timerWidth, timerHeight);
+        batch.draw(timerTexture, timerX, timerY, timerWidth, timerHeight);
         hudFont.setColor(Color.LIME);
-        centeredLayout.setText(hudFont, clock());
-        hudFont.draw(batch, clock(), timerX + timerWidth * TIMER_TEXT_X - centeredLayout.width / 2,
+        String time = clock();
+        centeredLayout.setText(hudFont, time);
+        hudFont.draw(batch, time, timerX + timerWidth * TIMER_TEXT_X - centeredLayout.width / 2,
                 timerY + timerHeight * TIMER_TEXT_Y + centeredLayout.height / 2);
 
+        String difficulty = levelNumber == 1 ? "EASY" : levelNumber == 2 ? "MEDIUM" : "HARD";
+        hudFont.draw(batch, "LEVEL " + levelNumber + "/3 - " + difficulty, PAD, -STRIP / 2 + 6);
         float abilitiesX = width - PAD - (3 * ICON + 2 * 16);
         float abilityY = -STRIP + TEXT_PAD + LABEL_HEIGHT + ICON_GAP;
         Texture[] icons = { dashIconTexture, illusionIconTexture, timeStopIconTexture };
@@ -373,7 +373,6 @@ public final class GameScreen extends ScreenAdapter {
         batch.end();
     }
 
-    /** One ability slot: dimmed with the seconds left, or bright with its key once ready. */
     private void drawAbility(float x, float y, Texture icon, float remaining, String label) {
         boolean ready = remaining <= 0;
         batch.setColor(ready ? Color.WHITE : DIMMED);
@@ -383,7 +382,6 @@ public final class GameScreen extends ScreenAdapter {
         drawCentered(ready ? label : Integer.toString((int) Math.ceil(remaining)), x + ICON / 2, y - ICON_GAP);
     }
 
-    /** Draws text centred on x, with the top of the line on y. */
     private void drawCentered(String text, float x, float y) {
         centeredLayout.setText(hudFont, text);
         hudFont.draw(batch, text, x - centeredLayout.width / 2, y);
@@ -391,7 +389,7 @@ public final class GameScreen extends ScreenAdapter {
 
     private String clock() {
         int seconds = (int) playTime, minutes = seconds / 60, rest = seconds % 60;
-        return minutes + ":" + (rest < 10 ? "0" : "") + rest;
+        return String.format("%02d:%02d", minutes, rest);
     }
 
     private Texture[] hudTextures() {
@@ -411,6 +409,9 @@ public final class GameScreen extends ScreenAdapter {
             if (snapshot.state() == GameSession.State.PLAYING) {
                 paused = false;
             } else {
+                if (snapshot.state() == GameSession.State.WON) {
+                    levelNumber = 1;
+                }
                 restart();
             }
         });
@@ -428,7 +429,7 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private void useIllusion() {
-        if (canPlay() && session.illusion()) {
+        if (session.illusion()) {
             illusionSound.play(.4f);
             Illusion clone = session.getIllusion();
             illusionAnimation = new CharacterAnimation(clone.x(), clone.y());
@@ -455,7 +456,7 @@ public final class GameScreen extends ScreenAdapter {
         overlay.setVisible(paused || snapshot.state() != GameSession.State.PLAYING);
         if (overlay.isVisible()) {
             boolean won = snapshot.state() == GameSession.State.WON, lost = snapshot.state() == GameSession.State.LOST;
-            overlayTitle.setText(won ? "Timeline Saved" : lost ? "You Were Caught" : "Paused");
+            overlayTitle.setText(won ? "All Levels Cleared" : lost ? "You Were Caught" : "Paused");
             overlayText.setText(won || lost ? "Score: " + session.score() : "Time can wait. So can the guards.");
             overlayButton.setText(won || lost ? "Try Again" : "Resume");
         }

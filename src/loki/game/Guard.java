@@ -17,6 +17,7 @@ public final class Guard {
             Player.Direction.DOWN, Player.Direction.RIGHT };
 
     private final Player body;
+    private final int difficulty;
     private final GuardType type;
     private final Level.Cell scatterCorner;
     private GuardStrategy strategy = new ScatterStrategy();
@@ -30,7 +31,11 @@ public final class Guard {
     private State state;
     private boolean frightened, forceTurn;
 
-    public Guard(Level level, Level.Cell spawn, GuardType type) {
+    public Guard(Level level, Level.Cell spawn, GuardType type, int difficulty) {
+        if (difficulty < 1 || difficulty > 3) {
+            throw new IllegalArgumentException("Difficulty must be between 1 and 3");
+        }
+        this.difficulty = difficulty;
         body = new Player(new Loki("TVA Guard", 0), spawn);
         this.type = Objects.requireNonNull(type);
         this.spawn = spawn;
@@ -214,7 +219,7 @@ public final class Guard {
         if (frightened || level.tunnel(currentCell())) {
             return 85;
         }
-        return 160;
+        return 120 + difficulty * 20;
     }
 
     public void steerTo(Level level, Level.Cell target) {

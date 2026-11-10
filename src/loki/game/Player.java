@@ -186,7 +186,7 @@ public final class Player {
         };
     }
 
-    public static Level.Cell step(Level.Cell startCell, Direction direction) {
+    private static Level.Cell step(Level.Cell startCell, Direction direction) {
         return switch (direction) {
         case UP -> new Level.Cell(startCell.x(), startCell.y() + 1);
         case DOWN -> new Level.Cell(startCell.x(), startCell.y() - 1);
