@@ -1,7 +1,7 @@
 package loki.decorator;
 
-import loki.factory.LokiVariant;
 import java.util.Objects;
+import loki.factory.LokiVariant;
 
 public abstract class EquipmentDecorator implements LokiVariant {
     protected final LokiVariant wrapped;
@@ -10,27 +10,23 @@ public abstract class EquipmentDecorator implements LokiVariant {
         this.wrapped = Objects.requireNonNull(wrapped);
     }
 
+    @Override
     public String getName() {
         return wrapped.getName();
     }
 
-    public String getDescription() {
-        return wrapped.getDescription();
-    }
-
+    @Override
     public int getMagicPower() {
         return wrapped.getMagicPower();
     }
 
-    public int getCombatPower() {
-        return wrapped.getCombatPower();
+    @Override
+    public int getAgility() {
+        return wrapped.getAgility();
     }
 
-    public int getDiplomacy() {
-        return wrapped.getDiplomacy();
-    }
-
-    public int getFailurePenalty() {
-        return wrapped.getFailurePenalty();
+    @Override
+    public int getHitDamage() {
+        return wrapped.getHitDamage();
     }
 }

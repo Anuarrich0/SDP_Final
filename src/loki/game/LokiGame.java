@@ -4,6 +4,16 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 
 public final class LokiGame extends Game {
+    private PlayerSkin selectedSkin = PlayerSkin.CLASSIC;
+
+    public PlayerSkin selectedSkin() {
+        return selectedSkin;
+    }
+
+    public void selectSkin(PlayerSkin skin) {
+        selectedSkin = java.util.Objects.requireNonNull(skin);
+    }
+
     @Override
     public void create() {
         showMenu();

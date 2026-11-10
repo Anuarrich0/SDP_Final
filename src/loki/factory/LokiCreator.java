@@ -1,7 +1,9 @@
 package loki.factory;
 
-// Factory Method: каждый Creator переопределяет создание своего варианта.
+// Factory Method: each creator overrides the creation of its variant.
 public abstract class LokiCreator {
+    private static final int BASE_MAGIC_POWER = 75;
+    private static final int BASE_AGILITY = 30;
     protected abstract LokiVariant createLoki();
 
     public final LokiVariant createVariant() {
@@ -9,66 +11,58 @@ public abstract class LokiCreator {
     }
 
     public static class OrdinaryCreator extends LokiCreator {
+        @Override
         protected LokiVariant createLoki() {
             return new OrdinaryLoki();
         }
 
-        public String toString() {
-            return "Обычный Локи";
-        }
     }
 
     public static class ClassicCreator extends LokiCreator {
+        @Override
         protected LokiVariant createLoki() {
             return new ClassicLoki();
         }
 
-        public String toString() {
-            return "Классический Локи";
-        }
     }
 
     public static class AlligatorCreator extends LokiCreator {
+        @Override
         protected LokiVariant createLoki() {
             return new AlligatorLoki();
         }
 
-        public String toString() {
-            return "Локи-аллигатор";
-        }
     }
 
     public static class SylvieCreator extends LokiCreator {
+        @Override
         protected LokiVariant createLoki() {
             return new Sylvie();
         }
 
-        public String toString() {
-            return "Сильви";
-        }
     }
 
     private static class OrdinaryLoki extends Loki {
         OrdinaryLoki() {
-            super("Обычный Локи", 45, 50, 65);
+            super("Ordinary Loki", BASE_MAGIC_POWER, BASE_AGILITY);
         }
     }
 
     private static class ClassicLoki extends Loki {
         ClassicLoki() {
-            super("Классический Локи", 75, 30, 45);
+            super("Classic Loki", BASE_MAGIC_POWER, BASE_AGILITY);
         }
     }
 
     private static class AlligatorLoki extends Loki {
         AlligatorLoki() {
-            super("Локи-аллигатор", 20, 80, 10);
+            super("Alligator Loki", BASE_MAGIC_POWER, BASE_AGILITY);
         }
     }
 
     private static class Sylvie extends Loki {
         Sylvie() {
-            super("Сильви", 65, 45, 55);
+            super("Sylvie", BASE_MAGIC_POWER, BASE_AGILITY);
         }
     }
 }

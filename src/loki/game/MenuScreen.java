@@ -7,11 +7,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import java.util.EnumMap;
 
 public final class MenuScreen extends ScreenAdapter {
     private final LokiGame game;
@@ -20,6 +27,8 @@ public final class MenuScreen extends ScreenAdapter {
     private final SpriteBatch batch = new SpriteBatch();
     private final Texture background = new Texture(Gdx.files.internal("menu-background.png"));
     private final Texture shade;
+    private final EnumMap<PlayerSkin, Texture> skinTextures = new EnumMap<>(PlayerSkin.class);
+    private final EnumMap<PlayerSkin, Button> skinButtons = new EnumMap<>(PlayerSkin.class);
 
     public MenuScreen(LokiGame game) {
         this.game = game;
@@ -37,6 +46,8 @@ public final class MenuScreen extends ScreenAdapter {
         shade.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         Table root = new Table();
         root.setFillParent(true);
+        root.add(ui.label("CHARACTER SKIN", .48f, GameUi.GOLD)).padBottom(16).row();
+        root.add(createSkinPicker()).padBottom(28).row();
         TextButton play = ui.button("PLAY", true, this::play);
         TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(play.getStyle());
         style.up = ui.panel("10291FF2");
@@ -52,6 +63,41 @@ public final class MenuScreen extends ScreenAdapter {
         frame.add(play).width(300).height(68);
         root.add(frame);
         stage.addActor(root);
+    }
+
+    private Table createSkinPicker() {
+        Table picker = new Table();
+        Button.ButtonStyle style = new Button.ButtonStyle();
+        style.up = ui.panel("304238");
+        style.over = ui.panel("7D8459");
+        style.down = ui.panel("526544");
+        style.checked = ui.panel("D5B479");
+        for (PlayerSkin skin : PlayerSkin.values()) {
+            Texture texture = new Texture(Gdx.files.internal(skin.textureFile()));
+            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            skinTextures.put(skin, texture);
+            Image preview = new Image(new TextureRegionDrawable(new TextureRegion(texture, 0, 0, 64, 96)));
+            Table content = new Table();
+            content.setBackground(ui.panel("10251FF5"));
+            content.add(preview).size(80, 120).padTop(8).row();
+            content.add(ui.label(skin.displayName(), .46f, Color.WHITE)).pad(8, 4, 12, 4);
+            Button button = new Button(style);
+            button.setName("skin-" + skin.name());
+            button.add(content).grow().pad(2);
+            button.setChecked(skin == game.selectedSkin());
+            button.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    game.selectSkin(skin);
+                    for (PlayerSkin choice : PlayerSkin.values()) {
+                        skinButtons.get(choice).setChecked(choice == skin);
+                    }
+                }
+            });
+            skinButtons.put(skin, button);
+            picker.add(button).width(174).height(174).pad(0, 6, 0, 6);
+        }
+        return picker;
     }
 
     private void play() {
@@ -95,5 +141,8 @@ public final class MenuScreen extends ScreenAdapter {
         batch.dispose();
         background.dispose();
         shade.dispose();
+        for (Texture texture : skinTextures.values()) {
+            texture.dispose();
+        }
     }
 }

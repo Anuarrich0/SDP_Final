@@ -178,19 +178,6 @@ public final class Level {
         return x < 0 || y < 0 || x >= width() || y >= height() || rows.get(height() - 1 - y).charAt(x) == '#';
     }
 
-    public boolean canStand(float x, float y, float radius) {
-        int left = (int) Math.floor((x - radius) / TILE), right = (int) Math.floor((x + radius) / TILE);
-        int bottom = (int) Math.floor((y - radius) / TILE), top = (int) Math.floor((y + radius) / TILE);
-        for (int cy = bottom; cy <= top; cy++) {
-            for (int cx = left; cx <= right; cx++) {
-                if (wall(cy == tunnelRow ? Math.floorMod(cx, width()) : cx, cy)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     public List<Cell> findPath(Cell start, Cell target) {
         return findPath(start, target, false);
     }
@@ -241,7 +228,7 @@ public final class Level {
         }
     }
 
-    public static Level training() {
+    public static Level tva() {
         return new Builder().rows(
                 "#########################",
                 "#C...O.............O...P#",

@@ -19,11 +19,11 @@ public final class Player {
 
     public Player(LokiVariant variant, Level.Cell spawn) {
         this.variant = Objects.requireNonNull(variant);
-        moveSpeed = 150 + variant.getCombatPower() * .4f;
+        moveSpeed = 150 + variant.getAgility() * .4f;
         setPosition(spawn);
     }
 
-    // Клон сохраняет положение между клетками, без скачка к центру.
+    // The clone keeps its position between cells without snapping to the center.
     Player(Player source) {
         variant = source.variant;
         startCell = source.startCell;
@@ -47,9 +47,6 @@ public final class Player {
         return y;
     }
 
-    public float speed() {
-        return moveSpeed;
-    }
 
     public void setSpeed(float speed) {
         if (!Float.isFinite(speed) || speed <= 0) {
@@ -108,7 +105,7 @@ public final class Player {
             reverse();
         }
         float remainingTime = deltaTime;
-        // Не теряем остаток времени при переходе в следующую клетку.
+        // Preserve the remaining time when moving to the next cell.
         while (remainingTime > .000001f) {
             if (!isMoving()) {
                 Direction turn = canMove(level, startCell, nextDirection) ? nextDirection : direction;
@@ -140,7 +137,7 @@ public final class Player {
             }
             float dx = targetCell.worldX() - startCell.worldX();
             float width = level.width() * Level.TILE;
-            // Через туннель идём по короткому пути через край экрана.
+            // Take the shortest tunnel route across the screen edge.
             if (dx > Level.TILE) {
                 dx -= width;
             } else if (dx < -Level.TILE) {

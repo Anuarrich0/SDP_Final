@@ -1,131 +1,109 @@
 # Loki TVA Escape
 
-Игра с видом сверху на Java 21 и LibGDX 1.14.0. Сборка через Maven.
+A top-down game built with Java 21 and LibGDX 1.14.0 using Maven.
+Loki must collect items, activate the TVA terminal, and escape through a portal
+while avoiding four guards with Pac-Man-inspired behavior.
 
-## Запуск
+## Running
 
-Открой корневой `pom.xml` в IDE как Maven-проект. Для проекта и Maven выбери JDK 21.
-В Windows запусти `run.cmd`: он соберёт проект и откроет игру.
-При первом запуске Maven скачает зависимости.
+Install JDK 21 and Maven and add them to PATH. Open the root `pom.xml` as a Maven project.
+On Windows, run this from the project root:
 
 ```powershell
 .\run.cmd
 ```
 
-## Интерфейс
-
-При запуске открывается фон с одной кнопкой Play по центру. Enter также
-начинает игру. Во время игры отображается только карта, без нижней панели.
-Esc открывает паузу с продолжением и возвратом в главное меню.
-
-## Управление
-
-| Клавиша | Действие |
-| --- | --- |
-| WASD или стрелки | Движение |
-| SPACE | Рывок |
-| E | Иллюзия |
-| F | Включить терминал после сбора TemPad |
-| Q | Остановка времени на 1,5 секунды, перезарядка 12 секунд |
-| ESC | Пауза |
-| R | Новая попытка |
-
-Карта 25×19 клеток. Собери точки, четыре энергетические сферы и три TemPad.
-После сбора TemPad подойди к терминалу и нажми F. Портал откроется,
-когда собраны все предметы и включён терминал.
-
-Локи продолжает идти после отпускания клавиши. Следующий поворот запоминается
-до доступного прохода; разворот назад выполняется сразу. Рывок ускоряет обычное
-движение по клеткам и не переносит сквозь стены.
-
-B-15 преследует напрямую, D-90 перехватывает впереди, C-20 обходит относительно
-B-15, X-5 отходит к углу на близком расстоянии. Расписание режимов:
-7/20/7/20/5/20/5 секунд, затем постоянное преследование. Энергетическая сфера
-на 6 секунд делает охранников уязвимыми и приостанавливает расписание.
-Пойманный охранник возвращается на свой спавн. За точки даются 10 очков,
-за сферу 50, за охранников в одной серии 200/400/800/1600.
-При обычном столкновении теряется здоровье, персонажи возвращаются на старт;
-собранные предметы сохраняются. R полностью начинает новую попытку.
-
-В центре находится пост TVA: B-15 начинает снаружи, D-90 выходит первой,
-затем C-20 после 30 точек и X-5 после следующих 60. Счётчик точек относится
-только к следующему в очереди. Если точки не собираются 4 секунды, выходит
-следующий охранник. Через дверь одновременно выпускается один ожидающий.
-После потери здоровья используются общие пороги 7/17/32 точки.
-Пойманные охранники заходят в домик и сразу выходят снова, без повторного
-ожидания порога. Локи и активно преследующие охранники в домик не заходят.
-
-Боковой туннель соединяет левый и правый края средней строки. Перемещение
-через границу плавное, разворот внутри перехода работает. Охранники в крайних
-трёх клетках туннеля замедляются. Столкновения учитывают соединение краёв.
-
-Q останавливает охранников на 1,5 секунды: Локи может безопасно пройти мимо.
-Вместе с ними останавливаются очередь выхода и таймеры режимов. Перезарядка
-способности составляет 12 секунд. Оранжевые клетки NULL — зоны подавления TVA:
-в них не работают рывок, иллюзия и остановка времени. Попадание в такую зону
-также завершает активную остановку времени и убирает иллюзию.
-
-Это адаптация Pac-Man для TVA, а не эмулятор аркады: сохранены здоровье,
-щит, иллюзия, рывок и задания. Очередь ориентирована на первый уровень
-оригинала; ROM-генератор случайных чисел, аркадная система жизней и ошибки
-оригинальной очереди не воспроизводятся. Ориентир поведения:
-[The Pac-Man Dossier](https://pacman.holenet.info/).
-
-Клон на E самостоятельно бежит по проходам, выбирает повороты и использует
-туннель. Все обычные охранники временно преследуют его вместо Локи, даже
-во время SCATTER. Уязвимые охранники продолжают убегать. Клон не собирает
-предметы и исчезает через 4,25 секунды у текущего героя; перезарядка — 7 секунд.
-После исчезновения охранники возвращаются к обычной логике. NULL подавляет клона.
-
-## Структура
-
-```text
-src/loki/
-  GameLauncher.java   main, запуск окна
-  game/               меню, игровой экран, интерфейс, персонажи, анимация
-  builder/            создание карты
-  factory/            создание вариантов Локи
-  decorator/          усиления и щит
-  strategy/           поведение охранников
-  facade/             общие правила игры
-  observer/           уведомления об изменении игры
-assets/               изображения и ссылки на Canva
-pom.xml               зависимости и сборка
-run.cmd               запуск игры
-```
-
-Начни с `src/loki/GameLauncher.java`: он открывает окно.
-В `game/GameScreen.java` находятся отрисовка и клавиши, а правила —
-в `facade/GameSession.java`. Карту можно изменить в `builder/Level.java`,
-метод `training()`.
-
-## Паттерны
-
-| Папка | Паттерн | Классы |
-| --- | --- | --- |
-| `builder` | Builder | `Level`, внутри него `Level.Builder` |
-| `factory` | Factory Method | `LokiCreator`, его Creator-классы, `Loki` и `LokiVariant` |
-| `decorator` | Decorator | `EquipmentDecorator`, `MagicAmplifier`, `TimeShield` |
-| `strategy` | Strategy | `GuardStrategy`, `PatrolStrategy`, `ChaseStrategy` |
-| `facade` | Facade | `GameSession` |
-| `observer` | Observer | `GameListener` |
-
-Паттерны работают вместе: `GameSession` из Facade отправляет события
-через `GameListener`, а `GameScreen` подписывается и обновляет HUD.
-Поэтому источник событий и подписчик находятся в своих игровых классах.
-
-## Сборка
+Maven downloads dependencies on the first run. To verify the build:
 
 ```powershell
 mvn clean package
 ```
 
-Готовый JAR-файл появится в папке `target`. Для запуска используй `run.cmd`.
+The JAR is generated in `target/`. The game uses PNG files from `assets/`, so
+launch it with `run.cmd`, which sets the working directory through Maven.
 
-Локи нарисован в Canva и анимирован в четырёх направлениях: три кадра для каждого.
-Шаги зависят от реального движения, при остановке направление сохраняется.
-Охранник анимирован в четырёх направлениях: стойка и две фазы шага.
-Пол и стены используют детализированные тайлы TVA из Canva; портал и TemPad тоже имеют свои текстуры.
-Ссылки на редактируемые рисунки находятся в assets/README.md.
-Сейчас одна карта; меню и сохранения ещё не реализованы.
-Старую версию проекта можно найти в истории Git.
+## Menu and controls
+
+Choose Classic Loki, Ordinary Loki, Sylvie, or Alligator and press Play or Enter.
+Your choice changes the appearance of the player and clone. All skins have the
+same gameplay stats. The selection persists when restarting or returning to the
+menu, but is not saved to disk. Only the map is displayed during gameplay.
+
+| Key | Action |
+| --- | --- |
+| WASD / arrow keys | Choose a direction; Loki keeps moving after the key is released |
+| Space | Dash; 2-second cooldown |
+| E | Moving clone; 7-second cooldown |
+| Q | Freeze guards for 1.5 seconds; 12-second cooldown |
+| F | Activate the nearby terminal after collecting three TemPads |
+| Esc | Pause, with options to resume or return to the menu |
+| R | Start a new attempt |
+
+The next turn is buffered until a passage is available. Reversing direction takes
+effect immediately. Dashing follows passages and cannot pass through walls.
+
+## How to win
+
+Collect all small dots, four power orbs, and three TemPads on the 25×19 map.
+After collecting the TemPads, approach the cyan computer marked TERMINAL and
+press F. The EXIT is an orange ring in the upper-right corner. It turns green
+when all items are collected and the terminal is active. Enter it to win.
+
+A power orb makes guards vulnerable for 6 seconds. Touching a vulnerable guard
+sends it back to the house. Each dot awards 10 points, each orb awards 50, and
+consecutive guards award 200/400/800/1600. A normal collision removes 20 health
+and returns the characters to their starting positions. Collected items remain
+collected. Reaching zero health ends the game in defeat.
+
+The clone runs through passages, turns, and uses the tunnel automatically.
+All normal guards temporarily chase it instead of Loki, even in SCATTER mode.
+The clone cannot collect items and lasts 4.25 seconds. Vulnerable guards keep
+moving randomly. Normal behavior resumes when the clone disappears.
+
+The side tunnel connects the edges of the middle row. Guards slow down in the
+three outermost cells at each end. Collision detection accounts for the wraparound.
+Q lets Loki safely pass frozen guards; the release queue and mode timers also
+pause. Orange NULL cells suppress abilities, remove the clone, and end an active
+time stop.
+
+## Guards
+
+- B-15 chases the target's current cell.
+- D-90 intercepts the target ahead of its position.
+- C-20 flanks the target relative to B-15's position.
+- X-5 retreats to its corner when the target is close.
+
+SCATTER/CHASE modes alternate for 7/20/7/20/5/20/5 seconds, followed by permanent
+chase mode. Power orbs pause this schedule. B-15 starts outside the house, D-90
+leaves first, C-20 leaves after 30 dots, and X-5 after another 60. If no dots are
+collected for 4 seconds, the next guard leaves. After losing health, shared
+thresholds of 7/17/32 dots apply. Captured guards return to the house and leave
+again without another wait. Loki and actively chasing guards cannot enter
+through the house door.
+
+This is a TVA adaptation rather than an arcade emulator. Health, abilities, and
+objectives are retained; the original release-queue bugs and ROM random number
+generator are not reproduced. Reference: [The Pac-Man Dossier](https://pacman.holenet.info/).
+
+## Code and design patterns
+
+| Path | Purpose |
+| --- | --- |
+| `src/loki/GameLauncher.java` | `main` entry point and LWJGL3 window |
+| `src/loki/game/` | Menu, game screen, skins, movement, and animation |
+| `src/loki/builder/Level.java` | Map Builder; the current maze is defined in `tva()` |
+| `src/loki/decorator/` | Decorator: `MagicAmplifier` extends clone duration; `TimeShield` reduces damage |
+| `src/loki/factory/` | Factory Method: each selected skin uses its own `LokiCreator` |
+| `src/loki/strategy/` | Strategy: `ChaseStrategy` and `ScatterStrategy` |
+| `src/loki/facade/GameSession.java` | Facade for rules, abilities, items, and the release queue |
+| `src/loki/observer/GameListener.java` | State Observer; the screen reacts to victory and defeat |
+| `assets/` | Textures and font in use; sources are listed in `assets/README.md` |
+
+Characters have a name, magic power, agility, and collision damage. Magic power
+affects clone duration; agility affects speed. Factories set magic power to 75
+and agility to 30. The amplifier adds 15 magic power, and the shield reduces
+damage from 30 to 20. All four skin factories create identical stats, so changing
+appearance does not change the difficulty.
+Development history is preserved in Git. The `target/` directory is generated by the build.
+
+Six patterns are used: Decorator, Factory Method, Builder, Strategy, Observer, and Facade.

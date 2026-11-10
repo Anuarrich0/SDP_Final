@@ -1,104 +1,68 @@
-# Спрайты
+# Game assets
 
-- `loki.png` — лист 192×288: три кадра в строке, размер кадра 64×96.
-  Строки сверху вниз: вниз, вверх, вправо. Для движения влево игра зеркально
-  отражает правый профиль. Кадр 0 — стойка, 1 и 2 — разные шаги.
-- `guard.png` — лист 192×288: три кадра в строке, кадр 64×96.
-  Строки: вниз, вверх, вправо; влево отражается в игре.
-  Кадр 0 — стойка, 1 и 2 — разные шаги с движением рук и ног.
-- `interior.png` — лист 192×48: пол, потёртый пол, стена, стена с лампой.
-  Каждый тайл занимает 48×48.
-- `objects.png` — лист 144×48: активный портал, закрытый портал и TemPad.
-  Кадры по 48×48; у предметов прозрачный фон.
+This directory contains the assets loaded by the current version.
 
-Локи собран из редактируемых фигур вручную в Canva:
+| File | Usage |
+| --- | --- |
+| `loki-classic.png` | Classic Loki |
+| `loki-ordinary.png` | Ordinary Loki in a TVA shirt |
+| `sylvie.png` | Sylvie: blonde hair, broken horn, dark outfit |
+| `loki-alligator.png` | Alligator with small golden horns |
+| `b15.png`, `d90.png`, `c20.png`, `x5.png` | Four guard types |
+| `interior.png` | Four 48×48 tiles: floor, alternate floor, wall, alternate wall |
+| `tempad.png` | TemPad collectible, 48×48 |
+| `menu-background.png` | Main menu background |
+| `ui/interface.fnt`, `ui/interface.png` | Bitmap font with Cyrillic support |
+
+Character sprite sheets are 192×288 RGBA. Each contains nine 64×96 frames.
+Rows from top to bottom: down, up, right. Columns: idle, walk A, walk B.
+The game mirrors the right-facing profile to face left. The background is transparent; the foot baseline is y=88.
+CharacterAnimation selects frames based on movement; animation freezes while paused.
+The clone uses the current player skin with a cyan tint and its own animation.
+
+## Canva sources
+
+Classic Loki is built from editable shapes:
 https://www.canva.com/design/DAHaVhqU250/prtAP13o427Q_y8PBYn5og/edit
-Страницы исходника: 1 — стойка вниз; 2–4 — вправо; 5–6 — шаги вниз;
-7–9 — вверх. PNG экспортированы из Canva, затем уменьшены в пять раз,
-белый фон заменён прозрачностью и кадры упакованы в один лист.
-Рисунки не генерируются при запуске. Охранник и интерьер собраны из фигур
-в отдельных дизайнах Canva двумя агентами параллельно:
-- Охранник: https://www.canva.com/design/DAHaWmyVLGU/k0eYDZKpNqujDgGgQJNF9g/edit
-  Страницы экспорта в порядке кадров атласа: 1, 2, 3, 7, 8, 9, 4, 5, 6.
-- Интерьер: https://www.canva.com/design/DAHaWk6-39M/npsVpeJ0YMUslvqCra_ObQ/edit
-  Страницы 1–4 совпадают с порядком тайлов в листе, 5–7 — предметы.
+Atlas page order: 1, 5, 6, 7, 8, 9, 2, 3, 4.
+PNGs were scaled down by a factor of five, and the white background was made transparent.
 
-`CharacterAnimation` выбирает направление и шаг по реальному перемещению Локи и охранников.
-При остановке показывает стойку и сохраняет направление; на паузе кадр замирает.
-Иллюзия использует тот же рисунок с голубым оттенком и собственную анимацию
-по текущему направлению движения. Все текстуры загружаются один раз, без сглаживания.
+Guards:
+- B-15: https://www.canva.com/design/DAHaatmNnsY/F4zB1WRkKTQN2KzEbNcv7Q/edit
+- D-90: https://www.canva.com/design/DAHaatGvseY/h0xojDwEym_4oCZWobN_8A/edit
+- C-20: https://www.canva.com/design/DAHaao8juTw/O--biCeF1Jwjn5qiMJBwsA/edit
+- X-5: https://www.canva.com/design/DAHaavnakI4/6929v8_tJf5fSGvPMOQhvQ/edit
+Page order: 1, 2, 3, 7, 8, 9, 4, 5, 6.
 
-В детализированной версии добавлены окантовка и складки одежды Локи, блики
-на шлемах, панели брони охранника, швы пола, решётки, вентиляция и консоль.
-PNG экспортированы из редактируемых рисунков Canva и упакованы в листы текстур.
+Interior and TemPad:
+https://www.canva.com/design/DAHaWk6-39M/npsVpeJ0YMUslvqCra_ObQ/edit
+TemPad was extracted from the third cell of the previous item atlas without changing its pixels.
+GameScreen draws the terminal, portal, and NULL markers; they have no separate textures.
 
+## Generated images
 
-## Новые охотники TVA
+Ordinary Loki, Alligator, the standalone Sylvie sprite, and the menu background were created with the built-in
+imagegen tool. They are not hand-drawn Canva artwork. After generation, the sprites were
+resized, aligned, and packed. Artwork is not generated at runtime.
 
-- `b15.png` — B-15: https://www.canva.com/design/DAHaatmNnsY/F4zB1WRkKTQN2KzEbNcv7Q/edit
-- `d90.png` — D-90: https://www.canva.com/design/DAHaatGvseY/h0xojDwEym_4oCZWobN_8A/edit
-- `c20.png` — C-20: https://www.canva.com/design/DAHaao8juTw/O--biCeF1Jwjn5qiMJBwsA/edit
-- `x5.png` — X-5: https://www.canva.com/design/DAHaavnakI4/6929v8_tJf5fSGvPMOQhvQ/edit
+Sprite prompts: match the classic sprite's coarse angular pixel style,
+muted green/gold palette, dark outline and simple shading; transparent background;
+exact 3×3 grid, 64:96 cell aspect, DOWN/UP/RIGHT rows, idle/walk A/walk B columns;
+consistent identity and centering; no text, grid or shadows.
 
-Каждый лист 192×288, кадр 64×96. Строки: вниз, вверх, вправо.
-В каждой строке: стойка, первый шаг, второй шаг. Для движения влево
-правый профиль отражается по горизонтали.
+- Ordinary: dark-haired fictional male trickster, white rolled-sleeve office shirt,
+  loose dark-green tie, brown trousers, dark boots; no horns or helmet.
+- Alligator: small green quadruped, tiny golden horned crown, square eyes,
+  short legs and tapered tail; rectangular pixel clusters, minimal scales.
+- Sylvie: fictional blonde female Norse trickster, shoulder-length blonde hair,
+  asymmetric golden headpiece with one broken horn, dark-green/black adventure
+  outfit, gold belt and boots; no resemblance to a real actor.
 
-У каждого персонажа своя открытая голова, причёска и черты лица.
-Детальная форма TVA и движения рук/ног используют общую основу охранника.
-Исходники состоят из редактируемых фигур Canva. Страницы дизайнов:
-1–3 — вниз, 4–6 — вправо, 7–9 — вверх.
+Background prompt: original cinematic environment illustration for a time-travel
+adventure game; empty retro-futurist time bureaucracy office, amber circular portal,
+brass elevators, analog clocks, teak desks, case files, green consoles, branching
+timeline; emerald and burnt-orange light, painterly realism, landscape 16:9;
+quiet dark left side, no people, text, logos, watermark or UI elements.
 
-Листы подготовлены для следующих изменений игровой логики.
-Текущий обычный охранник продолжает использовать guard.png.
-
-## Фон меню и интерфейс
-
-`menu-background.png` — отдельный фон стартового меню, создан встроенным imagegen.
-Варианты с Локи генератор отклонил. В итоговом изображении нет персонажей:
-это интерьер временного агентства с оранжевым порталом. Спрайты персонажей не менялись.
-
-Промпт итогового фона:
-
-> Original cinematic environment illustration for a time-travel adventure game main-menu background. Empty monumental retro-futurist time bureaucracy office, no people or characters. Warm amber circular time portal on the right, brass elevators, vintage analog clocks, teak desks, paper case files, green glass computer consoles, Art Deco brutalist architecture, distant delicate luminous branching timeline. Beautiful polished painterly realism, emerald green and warm burnt orange lighting, rich depth and volumetric haze. Wide landscape 16:9. The left 45 percent is dark and quiet negative space reserved for separately rendered game title and menu buttons. No text, no logo, no watermarks, no interface elements. Opaque background.
-
-`ui/interface.fnt` и `ui/interface.png` — растровый шрифт интерфейса с кириллицей
-на основе установленного Segoe UI. `ui/title.fnt` и `ui/title.png` — крупные буквы
-названия на основе Segoe UI Light. Шрифты уже подготовлены, дополнительных
-библиотек для их загрузки не требуется.
-
-
-## Варианты Локи
-
-Новые листы созданы встроенным imagegen по образцу `loki.png`.
-Это сгенерированные изображения, а не ручные рисунки Canva. После генерации
-кадры только уменьшены, выровнены и упакованы в атласы; фон прозрачный.
-
-- `loki-ordinary.png` — обычный Локи в рубашке, галстуке и брюках TVA, без шлема.
-- `sylvie.png` — Сильви со светлыми волосами, асимметричными рогами и зелёным костюмом.
-- `loki-alligator.png` — зелёный аллигатор с маленькой золотой короной.
-- `loki.png` — существующий классический Локи, не изменён.
-
-Каждый новый лист: 192×288 RGBA, девять разных кадров 64×96.
-Ряды сверху: вниз, вверх, вправо. Столбцы: стойка, шаг A, шаг B.
-Влево можно отражать правый профиль существующим кодом анимации.
-В игру пока подключён только классический вариант; новые файлы подготовлены
-для последующего выбора персонажа.
-
-Промпты генерации (общий образец — существующий атлас классического Локи):
-
-1. Ordinary Loki: new crisp pixel-art sprite sheet; dark-haired fictional male trickster,
-   no actor likeness, no horns or helmet, white rolled-sleeve TVA office shirt,
-   loose dark-green tie, brown trousers, dark boots, small green magic accent.
-2. Sylvie: new crisp pixel-art sprite sheet; original fictional blonde female Norse
-   trickster, no real actor likeness, shoulder-length blonde hair, asymmetric golden
-   headpiece with one broken horn, fitted dark-green/black adventure outfit,
-   gold belt, dark boots.
-3. Alligator Loki: new crisp pixel-art sprite sheet; small green quadruped alligator,
-   tiny golden horned crown, clear snout, short legs, tapered tail, scales and yellow eyes.
-
-Общие требования каждого промпта: match reference pixel density, outline, shading,
-proportions and top-down RPG perspective; transparent background; exact 3×3 grid;
-64:96 cell aspect, 192:288 sheet aspect; rows DOWN/UP/RIGHT; columns standing,
-left-leg step, right-leg step (opposite diagonal leg pairs for alligator);
-consistent identity, full body/tail visible; no labels, grid, text, shadows or cropping.
+The interface font was prepared from the installed Segoe UI font. The FNT and PNG files
+are ready to load in LibGDX; no additional libraries are required.

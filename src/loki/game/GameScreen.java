@@ -1,14 +1,13 @@
 package loki.game;
 
 import loki.builder.Level;
-import loki.decorator.MagicAmplifier;
-import loki.decorator.TimeShield;
 import loki.facade.GameSession;
-import loki.factory.LokiCreator;
 import loki.factory.LokiVariant;
 import loki.observer.GameListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import loki.decorator.MagicAmplifier;
+import loki.decorator.TimeShield;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -34,8 +33,8 @@ public final class GameScreen extends ScreenAdapter {
     private final ShapeRenderer shapes = new ShapeRenderer();
     private final SpriteBatch batch = new SpriteBatch();
     private final BitmapFont font = new BitmapFont();
-    private final Texture lokiTexture = new Texture(Gdx.files.internal("loki.png"));
-    private final TextureRegion[][] lokiSprites = createSprites(lokiTexture);
+    private final Texture lokiTexture;
+    private final TextureRegion[][] lokiSprites;
     private CharacterAnimation playerAnimation;
     private List<CharacterAnimation> guardAnimations;
     private CharacterAnimation illusionAnimation;
@@ -43,12 +42,13 @@ public final class GameScreen extends ScreenAdapter {
     private final EnumMap<GuardType, TextureRegion[][]> guardSprites = new EnumMap<>(GuardType.class);
     private final Texture interiorTexture = new Texture(Gdx.files.internal("interior.png"));
     private final TextureRegion[] tiles = TextureRegion.split(interiorTexture, 48, 48)[0];
-    private final Texture objectsTexture = new Texture(Gdx.files.internal("objects.png"));
-    private final TextureRegion[] objects = TextureRegion.split(objectsTexture, 48, 48)[0];
+    private final Texture temPadTexture = new Texture(Gdx.files.internal("tempad.png"));
+    private final TextureRegion temPadSprite = new TextureRegion(temPadTexture);
     private final GameListener stateListener = s -> snapshot = s;
     private GameSession session;
     private GameSession.Snapshot snapshot;
     private final LokiGame game;
+    private final PlayerSkin skin;
     private final GameUi ui = new GameUi();
     private final Stage stage = new Stage(new FitViewport(1200, 984));
     private final Label overlayTitle = ui.label("", 1, Color.WHITE);
@@ -64,6 +64,9 @@ public final class GameScreen extends ScreenAdapter {
 
     public GameScreen(LokiGame game) {
         this.game = game;
+        skin = game == null ? PlayerSkin.CLASSIC : game.selectedSkin();
+        lokiTexture = new Texture(Gdx.files.internal(skin.textureFile()));
+        lokiSprites = createSprites(lokiTexture);
         for (GuardType type : GuardType.values()) {
             Texture texture = new Texture(Gdx.files.internal(type.textureFile()));
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -72,7 +75,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         lokiTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         interiorTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-        objectsTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        temPadTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         buildInterface();
         restart();
     }
@@ -81,9 +84,9 @@ public final class GameScreen extends ScreenAdapter {
         if (session != null) {
             session.removeListener(stateListener);
         }
-        LokiVariant hero = new TimeShield(new MagicAmplifier(new LokiCreator.ClassicCreator().createVariant()));
+        LokiVariant hero = new TimeShield(new MagicAmplifier(skin.createVariant()));
         illusionAnimation = null;
-        session = new GameSession(Level.training(), hero);
+        session = new GameSession(Level.tva(), hero);
         playerAnimation = new CharacterAnimation(session.player().x(), session.player().y());
         guardAnimations = new ArrayList<>();
         for (Guard guard : session.guards()) {
@@ -175,7 +178,7 @@ public final class GameScreen extends ScreenAdapter {
             }
         }
         for (Level.Cell charge : session.charges()) {
-            batch.draw(objects[2], charge.worldX() - 12, charge.worldY() - 12, 24, 24);
+            batch.draw(temPadSprite, charge.worldX() - 12, charge.worldY() - 12, 24, 24);
         }
         batch.end();
         shapes.begin(ShapeRenderer.ShapeType.Filled);
@@ -273,7 +276,7 @@ public final class GameScreen extends ScreenAdapter {
         card.pad(34);
         card.add(overlayTitle).padBottom(16).row();
         card.add(overlayText).padBottom(28).row();
-        overlayButton = ui.button("Продолжить", true, () -> {
+        overlayButton = ui.button("Resume", true, () -> {
             if (snapshot.state() == GameSession.State.PLAYING) {
                 paused = false;
             } else {
@@ -281,7 +284,7 @@ public final class GameScreen extends ScreenAdapter {
             }
         });
         card.add(overlayButton).width(340).height(54).padBottom(12).row();
-        card.add(ui.button("В главное меню", false, () -> {
+        card.add(ui.button("Main Menu", false, () -> {
             if (game != null) {
                 Gdx.app.postRunnable(game::showMenu);
             }
@@ -307,25 +310,25 @@ public final class GameScreen extends ScreenAdapter {
         overlay.setVisible(paused || snapshot.state() != GameSession.State.PLAYING);
         if (overlay.isVisible()) {
             boolean won = snapshot.state() == GameSession.State.WON, lost = snapshot.state() == GameSession.State.LOST;
-            overlayTitle.setText(won ? "Временная линия спасена" : lost ? "Вас поймали" : "Пауза");
-            overlayText.setText(won || lost ? "Очки: " + session.score() : "Время подождёт. Охранники тоже.");
-            overlayButton.setText(won || lost ? "Новая попытка" : "Продолжить");
+            overlayTitle.setText(won ? "Timeline Saved" : lost ? "You Were Caught" : "Paused");
+            overlayText.setText(won || lost ? "Score: " + session.score() : "Time can wait. So can the guards.");
+            overlayButton.setText(won || lost ? "Try Again" : "Resume");
         }
     }
 
     private Player.Direction getInputDirection() {
-        int[] keys = { Input.Keys.W, Input.Keys.UP, Input.Keys.S, Input.Keys.DOWN, Input.Keys.A, Input.Keys.LEFT,
-                Input.Keys.D, Input.Keys.RIGHT };
-        Player.Direction[] directions = { Player.Direction.UP, Player.Direction.UP, Player.Direction.DOWN,
-                Player.Direction.DOWN, Player.Direction.LEFT, Player.Direction.LEFT, Player.Direction.RIGHT,
-                Player.Direction.RIGHT };
-        Player.Direction inputDirection = Player.Direction.NONE;
+        int[] keys = { Input.Keys.W, Input.Keys.UP, Input.Keys.S, Input.Keys.DOWN,
+                Input.Keys.A, Input.Keys.LEFT, Input.Keys.D, Input.Keys.RIGHT };
+        Player.Direction[] directions = { Player.Direction.UP, Player.Direction.UP,
+                Player.Direction.DOWN, Player.Direction.DOWN, Player.Direction.LEFT,
+                Player.Direction.LEFT, Player.Direction.RIGHT, Player.Direction.RIGHT };
+        Player.Direction direction = Player.Direction.NONE;
         for (int i = 0; i < keys.length; i++) {
             if (Gdx.input.isKeyJustPressed(keys[i])) {
-                inputDirection = directions[i];
+                direction = directions[i];
             }
         }
-        return inputDirection;
+        return direction;
     }
 
     private static TextureRegion[][] createSprites(Texture texture) {
@@ -398,7 +401,7 @@ public final class GameScreen extends ScreenAdapter {
             texture.dispose();
         }
         interiorTexture.dispose();
-        objectsTexture.dispose();
+        temPadTexture.dispose();
         lokiTexture.dispose();
     }
 }

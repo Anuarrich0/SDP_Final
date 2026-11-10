@@ -101,9 +101,6 @@ public final class GameSession {
         return timeStop;
     }
 
-    public float timeStopCooldown() {
-        return timeStopCooldown;
-    }
 
     public boolean stopTime() {
         if (state != State.PLAYING || magicBlocked() || timeStopCooldown > 0) {
@@ -151,13 +148,7 @@ public final class GameSession {
         listeners.remove(listener);
     }
 
-    public float getDashCooldown() {
-        return dashCooldown;
-    }
 
-    public float getIllusionCooldown() {
-        return illusionCooldown;
-    }
 
     public Illusion getIllusion() {
         return illusion;
@@ -321,7 +312,7 @@ public final class GameSession {
     }
 
     private void handlePlayerHit() {
-        health = Math.max(0, health - player.variant().getFailurePenalty() * 2);
+        health = Math.max(0, health - player.variant().getHitDamage());
         hurtCooldown = 2;
         player.setPosition(level.spawn());
         illusion = null;
