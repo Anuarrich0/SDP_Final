@@ -15,7 +15,6 @@ public final class GameLauncher {
         config.setWindowSizeLimits(700, 580, -1, -1);
         config.useVsync(true);
         config.setForegroundFPS(60);
-        config.disableAudio(true);
         new Lwjgl3Application(new LokiGame(), config);
     }
 }

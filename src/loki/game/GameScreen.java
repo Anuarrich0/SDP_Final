@@ -3,6 +3,7 @@ package loki.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -43,7 +44,14 @@ public final class GameScreen extends ScreenAdapter {
     private final TextureRegion[] tiles = TextureRegion.split(interiorTexture, 48, 48)[0];
     private final Texture temPadTexture = new Texture(Gdx.files.internal("tempad.png"));
     private final TextureRegion temPadSprite = new TextureRegion(temPadTexture);
-    private final GameListener stateListener = s -> snapshot = s;
+    private final Sound pickupSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pickup.wav"));
+    private final Sound dashSound = Gdx.audio.newSound(Gdx.files.internal("sounds/dash.wav"));
+    private final Sound illusionSound = Gdx.audio.newSound(Gdx.files.internal("sounds/illusion.wav"));
+    private final Sound stopSound = Gdx.audio.newSound(Gdx.files.internal("sounds/stop.wav"));
+    private final Sound hurtSound = Gdx.audio.newSound(Gdx.files.internal("sounds/hurt.wav"));
+    private final Sound winSound = Gdx.audio.newSound(Gdx.files.internal("sounds/win.wav"));
+    private final Sound loseSound = Gdx.audio.newSound(Gdx.files.internal("sounds/lose.wav"));
+    private final GameListener stateListener = this::onStateChanged;
     private GameSession session;
     private GameSession.Snapshot snapshot;
     private final LokiGame game;
@@ -89,6 +97,7 @@ public final class GameScreen extends ScreenAdapter {
         for (Guard guard : session.guards()) {
             guardAnimations.add(new CharacterAnimation(guard.x(), guard.y()));
         }
+        snapshot = null;
         session.addListener(stateListener);
         paused = false;
         elapsed = 0;
@@ -120,25 +129,36 @@ public final class GameScreen extends ScreenAdapter {
         }
         if (canPlay() && deltaTime > 0) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                session.dash();
+                if (session.dash()) {
+                    dashSound.play(.4f);
+                }
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
                 useIllusion();
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
-                session.stopTime();
+                if (session.stopTime()) {
+                    stopSound.play(.4f);
+                }
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
-                session.activateTerminal();
+                if (session.activateTerminal()) {
+                    pickupSound.play(.4f);
+                }
             }
             Player.Direction inputDirection = getInputDirection();
             if (inputDirection != Player.Direction.NONE) {
                 session.player().queueDirection(inputDirection);
             }
+            int itemsBefore = session.dots().size() + session.powers().size() + session.charges().size();
             elapsed += Math.min(deltaTime, .25f);
             while (elapsed >= 1f / 120) {
                 session.update(1f / 120, inputDirection);
                 elapsed -= 1f / 120;
+            }
+            int itemsAfter = session.dots().size() + session.powers().size() + session.charges().size();
+            if (itemsAfter < itemsBefore) {
+                pickupSound.play(.2f);
             }
             playerAnimation.updatePosition(session.player().x(), session.player().y());
             playerAnimation.updateDirection(session.player().currentDirection());
@@ -287,10 +307,26 @@ public final class GameScreen extends ScreenAdapter {
 
     private void useIllusion() {
         if (canPlay() && session.illusion()) {
+            illusionSound.play(.4f);
             Illusion clone = session.getIllusion();
             illusionAnimation = new CharacterAnimation(clone.x(), clone.y());
             illusionAnimation.updateDirection(session.player().currentDirection());
         }
+    }
+
+    private void onStateChanged(GameSession.Snapshot current) {
+        if (snapshot != null) {
+            if (current.state() != snapshot.state()) {
+                if (current.state() == GameSession.State.WON) {
+                    winSound.play(.5f);
+                } else if (current.state() == GameSession.State.LOST) {
+                    loseSound.play(.5f);
+                }
+            } else if (current.health() < snapshot.health()) {
+                hurtSound.play(.5f);
+            }
+        }
+        snapshot = current;
     }
 
     private void updateOverlay() {
@@ -390,5 +426,12 @@ public final class GameScreen extends ScreenAdapter {
         interiorTexture.dispose();
         temPadTexture.dispose();
         lokiTexture.dispose();
+        pickupSound.dispose();
+        dashSound.dispose();
+        illusionSound.dispose();
+        stopSound.dispose();
+        hurtSound.dispose();
+        winSound.dispose();
+        loseSound.dispose();
     }
 }
